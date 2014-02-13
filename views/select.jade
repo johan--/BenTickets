@@ -1,0 +1,76 @@
+extends layout
+block content
+  head
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+    script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+    link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+    meta(name='description', content='Benbria Support Tickets')
+    script.
+      var org = !{JSON.stringify([organizations])};
+      console.log(org);
+      function SETcookie(){
+        document.cookie="Selected="+document.getElementById('myList').selectedIndex;
+        document.cookie="Organization="+document.getElementById('myList').value;}
+      function GETcookie(){
+        if (document.cookie){
+          eval(document.cookie);
+          document.getElementById('myList').selectedIndex=Selected;}}
+  body(onLoad="GETcookie()")
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='changePass')
+                  img.icon(src='img/icons/password.png', hieght="25", width="25")
+                a(href='changePass') Change Password
+              li
+              li
+                a(href='changePass')
+                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
+                a(href='KnowledgeBase') KnowledgeBase
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+          #milieu
+            h1.titre Welcome to Benbria Support!
+            .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+            form(action="organization",method="get")
+              fieldset
+                legend Organization Selection
+                p
+                  label Location
+                  select(id="myList",name="id",onChange="SETcookie()")
+                    - for (var x in organizations)
+                      option(value="#{organizations[x]}") #{x}
+                  br
+                input#submit(type="submit",value="Submit")
+    #contact 
+      contact.link Contact Us
+    script.
+      $("#contact").on('click', function(e) {
+          $('.lean_overlay_2').dialog({ modal: true,
+            buttons: [ 
+              { text: "Ok", 
+                click: function() { 
+                  $( this ).dialog( "close" ); 
+                  } 
+              } 
+            ]
+          });
+      });
+      
+    
+      

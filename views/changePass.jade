@@ -1,0 +1,84 @@
+extends layout
+block content
+  head
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+    script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+    link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+    meta(name='description', content='Benbria Support Tickets')
+  body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='select')
+                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
+                a(href='select') Select Location
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+          #milieu
+            h1.titre Welcome to Benbria Support! 
+            .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
+            .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+
+            form(action="/changePass",method="post",enctype="multipart/form-data")
+              fieldset
+                legend Change Password
+                p Current Password:
+                input(type="password", name ="currPass")
+                p New Password
+                input(type="password", name ="passFirst")
+                p Type New Password Again:
+                input(type="password", name ="passSecond")
+                br
+                input#submit(type="submit", value="Submit")
+    #contact 
+      contact.link Contact Us
+    script.
+      $("#contact").on('click', function(e) {
+          $('.lean_overlay_2').dialog({ modal: true,
+            buttons: [ 
+              { text: "Ok", 
+                click: function() { 
+                  $( this ).dialog( "close" ); 
+                  } 
+              } 
+            ]
+          });
+      });
+      if (#{showModal}) {
+        if (#{status} == 200) {
+          $('.lean_overlay').html('Your password for #{username} has been succesfully updated.');
+        }
+        if (#{status} == 400) {
+          $('.lean_overlay').html('Password entered for #{username} is incorrect, please try again');
+        }
+        if (#{status} == 500) {
+          $('.lean_overlay').html('Passwords do not match for #{username}, please try again');
+        }
+        $('.lean_overlay').dialog({ modal: true, 
+            buttons: [ 
+              { text: "Ok", 
+                click: function() { 
+                  $( this ).dialog( "close" ); 
+                } 
+              } 
+            ] 
+          });
+      }
+    
+    
+      

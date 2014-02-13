@@ -1,0 +1,18 @@
+extends layout
+block content
+  head
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+    meta(name='description', content='Benbria Support Tickets Login')
+    body
+      form(action="addUser",method="get")
+        fieldset
+          legend Login
+          p Email Address:
+          textarea(rows="1", cols="100", name ="username")
+          p Password:
+          textarea(rows="1", cols="100", name ="password")
+          p organizations:
+          textarea(rows="1", cols="1000", name ="organizations")
+          p forum
+          textarea(rows="1", cols="100", name="forum")
+          input(type="submit",value="Submit")

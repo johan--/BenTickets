@@ -1,0 +1,141 @@
+extends layout
+block content
+  head
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+  script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+  script(src="javascripts/uploadView.js")
+  link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='create')
+                  img.icon(src='img/icons/add.png', hieght="25", width="25")
+                a(href='create') Add a Ticket
+              li
+                a(href='organization?id='+orgId)
+                  img.icon(src='img/icons/back.png', hieght="25", width="25")
+                a(href='organization?id='+orgId) Select another Ticket
+              li
+                a(href='changePass')
+                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
+                a(href='KnowledgeBase') KnowledgeBase
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+        #milieu
+          .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          h2 Benbria Ticket# #{id}
+          p
+           h1.titre SUBJECT LINE: 
+            span #{subject}
+          .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
+          fieldset
+            legend TICKET DETAILS:
+            h1.subheading DESCRIPTION:
+            p!=description.replace(/\n/g, '<br />')
+            h1.subheading STATUS:
+            bold START DATE &nbsp&nbsp&nbsp#{dcreate_date}
+            p
+            bold TYPE &nbsp&nbsp&nbsp#{type}
+            p
+            bold STATUS &nbsp&nbsp&nbsp#{state.status}
+            p
+            bold UPDATE DATE&nbsp&nbsp&nbsp#{state.created_at}
+            p
+            - for (var i=0;i<newAttachments.length;i++) {
+            a(href='#{newAttachments[i].url}')
+                  img#submit(src='img/icons/file.png',class='view')
+            a(href='#{newAttachments[i].url}', target='_blank') #{newAttachments[i].filename}&nbsp&nbsp&nbsp
+            -}
+          - if (comments.length > 0) {         
+          fieldset
+            h1.subheading COMMENTS:
+            - for (var i = comments.length-1; i>=0; i--) {
+              img(src='img/icons/comment.png',class='comment') 
+              &nbsp&nbsp&nbspDate: &nbsp&nbsp#{comments[i].created_at}
+              p!=comments[i].comment.replace(/\n/g, '<br />')
+              p
+              bold Author:&nbsp#{comments[i].author_name}
+              p
+              - for (var j = 0; j < comments[i].attachments.length; j++) {
+                a(href='#{comments[i].attachments[j].url}')
+                  img#submit(src='img/icons/file.png',class='view')
+                a(href='#{comments[i].attachments[j].url}', target='_blank') #{comments[i].attachments[j].filename}&nbsp&nbsp&nbsp
+              -}
+              - if ( i != 0) {
+                p.seperator
+              -}
+            -}
+          -}
+          - if (state.status != 'CLOSED') {
+            form(action="/ticketUpdate",method="post",enctype="multipart/form-data")
+              input(type="hidden", name="id", id="ticket", value=ticket)
+              fieldset
+                legend Add Comment:
+                p type your comment below:
+                textarea(rows="10",cols="100",name ="comment")
+                p 
+                .fileinputs
+                  #ifl(style='display:none')
+                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+                  p
+                    img(src='img/icons/attach.png',class='cover',onclick="$('#ii').click()") Attach
+                  ul#view_ifl
+                br
+                input#submit(type="submit", value="Submit")
+          -}
+    #contact 
+      contact.link Contact Us
+  script.
+    $("#contact").on('click', function(e) {
+        $('.lean_overlay_2').dialog({ modal: true,
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+                } 
+            } 
+          ]
+        });
+    });
+    if (#{showModal}) {
+      if (#{result} == 200) {
+        $('.lean_overlay').html('Ticket was successfully updated.');
+      }
+      else {
+        $('.lean_overlay').html('Error updating. Please contact the administrator.');
+      }
+      $('.lean_overlay').dialog({ modal: true, 
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+              } 
+            } 
+          ] 
+        });
+    }
+  
+
+
+
+      
+
+
+
+ 

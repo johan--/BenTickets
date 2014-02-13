@@ -1,0 +1,128 @@
+extends layout
+block content
+  head
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+  script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+  script(src="javascripts/uploadView.js")
+  script(src="//tinymce.cachefly.net/4.0/tinymce.min.js")
+  link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  script.
+    tinymce.init({
+        selector:"textarea",
+        plugins: [
+                "advlist autolink autosave link image lists charmap print preview hr",
+                "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+                "table contextmenu directionality emoticons template textcolor paste textcolor"
+        ],
+        toolbar1: "newdocument fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
+        toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent | undo redo | link unlink image media code | inserttime preview | forecolor backcolor table | charmap emoticons | print fullscreen",
+
+        menubar: true,
+        toolbar_items_size: 'small',
+
+        style_formats: [
+                {title: 'Bold text', inline: 'b'},
+                {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+                {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+                {title: 'Example 1', inline: 'span', classes: 'example1'},
+                {title: 'Example 2', inline: 'span', classes: 'example2'},
+                {title: 'Table styles'},
+                {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
+        ],
+    });
+  body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='changePass')
+                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
+                a(href='KnowledgeBase') KnowledgeBase
+              li
+                a(href='select')
+                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
+                a(href='select') Select Ticket Location
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+        #milieu
+          h1.titre Benbria Forum : #{name}
+          .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          p
+          h2 Please enter your topic
+          .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
+          
+                    
+          form(action="/topicCreate",method="post",enctype="multipart/form-data")
+            input(type="hidden", name="organization", id="organization", value=organization)
+            fieldset
+              legend Add A New Topic:
+              p Topic Title:
+              input.extend(rows="1", cols="1000", name ="subject")
+              p Detailed Description of topic:
+              textarea(rows="30", cols="100", wrap="soft", name ="comment")
+              p
+              .fileinputs
+                #ifl(style='display:none')
+                  input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+                p
+                  img#imgId(src='img/icons/attach.png',class='cover',onclick="$('#ii').click()") Attach
+                ul#view_ifl
+              br
+              input#submit(type="submit", value="Submit")
+    #contact 
+      contact.link Contact Us
+  script.
+    $("#contact").on('click', function(e) {
+        $('.lean_overlay_2').dialog({ modal: true,
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+                } 
+            } 
+          ]
+        });
+    });
+    if (#{showModal}) {
+      if (#{result} == 201) {
+        $('.lean_overlay').html('Topic was successfully added. Please wait about 2 minutes before new topic is available');
+      } else {
+        if (#{result} == 422) {
+          $('.lean_overlay').html('You must enter a Subject and Detailed Description to submit a new Topic');
+        } else {
+          $('.lean_overlay').html('Error updating. Please contact the administrator.');
+        }
+      }
+      $('.lean_overlay').dialog({ modal: true, 
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+                } 
+            } 
+          ] 
+        });
+    }
+  
+
+
+
+      
+
+
+
+ 

@@ -1,0 +1,137 @@
+extends layout
+block content
+  head
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+  script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+  script (src="//tinymce.cachefly.net/4.0/tinymce.min.js")
+  script(src="javascripts/uploadView.js")
+  link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  script.
+    var body = !{JSON.stringify(body)};
+    console.log(body);
+    
+  body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='create')
+                  img.icon(src='img/icons/add.png', hieght="25", width="25")
+                a(href='topicAdd') Add a Topic
+              li
+                a(href='changePass')
+                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
+                a(href='KnowledgeBase') KnowledgeBase
+              li
+                a(href='select')
+                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
+                a(href='select') Select Organization
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+        #milieu
+          .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          h2 Benbria Topic ID #{id}
+          p
+           h1.titre SUBJECT LINE: 
+            span #{subject}
+          .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
+          fieldset
+            legend TOPIC DETAILS:
+            p  
+            strong CREATE DATE &nbsp&nbsp&nbsp#{created_at}
+          fieldset
+            p!= body.replace(/\n/g, '<br />')
+            p
+            - for (var i=0;i<newAttachments.length;i++) {
+              a(href='#{newAttachments[i].url}')
+                    img#submit(src='img/icons/file.png',class='view')
+              a(href='#{newAttachments[i].url}', target='_blank') #{newAttachments[i].filename}&nbsp&nbsp&nbsp
+            -}
+          - if (comments) { 
+          fieldset
+            h1.subheading COMMENTS: 
+            - for (var i=0; i<comments.length; i++) {
+              img(src='img/icons/comment.png',class='comment')
+              &nbsp #{comments[i].created_at} 
+              p!= comments[i].comment.replace(/\n/g, '<br />')
+              p
+              - for (var j = comments[i].attachments.length-1; j>=0; j--) {
+                a(href='#{comments[i].attachments[j].url}')
+                  img#submit(src='img/icons/file.png',class='view') 
+                  a(href='#{comments[i].attachments[j].url}', target='_blank') #{comments[i].attachments[j].filename}
+              -}
+              - if ( i != comments.length -1) {
+                p.seperator
+              -}
+            -}
+          -}
+            form(action="/commentUpdate",method="post",enctype="multipart/form-data")
+              input(type="hidden", name="id", id="comment", value=id)
+              fieldset
+                legend Add Comment:
+                p type your comment below:
+                textarea(rows="10",cols="100",name ="comment")
+                p 
+                .fileinputs
+                  #ifl(style='display:none')
+                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+                  p
+                    img(src='img/icons/attach.png',class='cover',onclick="$('#ii').click()") Attach
+                  ul#view_ifl
+                br
+                input#submit(type="submit", value="Submit")
+          
+    #contact 
+      contact.link Contact Us
+  script.
+    $("#contact").on('click', function(e) {
+        $('.lean_overlay_2').dialog({ modal: true,
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+                } 
+            } 
+          ]
+        });
+    });
+    if (#{showModal}) {
+      if (#{result} == 201) {
+        $('.lean_overlay').html('Your comment was successfully updated.');
+      }
+      else {
+        $('.lean_overlay').html('Error updating comment. Please contact the Benbria Support.');
+      }
+      $('.lean_overlay').dialog({ modal: true, 
+          buttons: [ 
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+              } 
+            } 
+          ] 
+        });
+    }
+  
+
+
+
+      
+
+
+
+ 

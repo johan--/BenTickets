@@ -1,0 +1,70 @@
+extends layout
+block content
+  head
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+    script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+    link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+    meta(name='description', content='Benbria Support Tickets Login')
+    body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #milieu
+            h1.titre Welcome to Benbria Support!
+            .lean_overlay(style="display:none")= "WARNING: Ticket has NO DATA."
+            .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+                
+
+            form(action="userCheck",method="post",enctype="multipart/form-data")
+              fieldset
+                legend Login
+                p Email Address:
+                input(rows="1", cols="50", name ="username")
+                p Password:
+                input(type="password", name ="password")
+                p 
+                input#submit(type="submit",value="Submit")
+    #contact 
+      contact.link Contact Us
+    
+
+  script.
+    $("#contact").on('click', function(e) {
+        $('.lean_overlay_2').dialog({ modal: true,
+          buttons: [
+            { text: "Ok", 
+              click: function() { 
+                $( this ).dialog( "close" ); 
+                },
+              class: 'ui-icon-circle-close'
+            }
+          ],
+          create: function(e, ui) {
+            console.log(e.target);
+            $('button.ui-button[title="close"]').html('<img class="x" src="img/icons/close.png"></img>');
+          }
+        });
+    });
+
+    if (#{showModal}) {
+      $('.lean_overlay').html('Error Logging On. Please try again or contact the administrator.');
+      $('.lean_overlay').dialog({ modal: true,   
+        buttons: [ 
+          { text: "Ok", 
+            click: function() { 
+              $( this ).dialog( "close" ); 
+              } 
+          } 
+        ] 
+      });
+    }
+    

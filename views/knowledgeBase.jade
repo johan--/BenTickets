@@ -1,0 +1,92 @@
+extends layout
+block content
+  head
+  script(src="https://www.google.com/jsapi")
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+  script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+  link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  meta(name='description', content='Benbria Support Tickets')
+  script.
+    
+    // Load the Visualization API and the piechart package.
+    google.load('visualization', '1', {'packages':['table']});
+      
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.setOnLoadCallback(drawTable);
+
+      
+    function drawTable() {
+      var gd = !{JSON.stringify(gd)};
+      console.log(gd); 
+      
+      var chart = new google.visualization.DataTable(gd); 
+      
+      if (gd) {
+
+        var table = new google.visualization.Table(document.getElementById('chart_div'));
+        table.draw(chart, {showRowNumber: false});
+
+        // Add event if user clicks a ticket in row
+        google.visualization.events.addListener(table, 'select', function() {
+          var row = table.getSelection()[0].row;
+          window.open("topic?id="+chart.getValue(row, 0),"_self");
+        });
+      } else {
+        $('#chart_div').text("NO TOPICS FOUND FOR YOUR FORUM");
+      }
+    }
+  body
+    #header
+      #headerwrapper
+        a(href='/')
+          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
+    #container
+      div
+        div
+          #gauche
+            h3 MENU
+            ul
+              li
+                a(href='create')
+                  img.icon(src='img/icons/add.png', hieght="25", width="25")
+                a(href='topicAdd') Add a Topic
+              li
+                a(href='select')
+                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
+                a(href='select') Select Organization
+              li
+                a(href='index')
+                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
+                a(href='index') Log Out
+          #milieu
+            h1.titre FORUM: #{name}
+            .lean_overlay_2(style="display:none")
+              div
+                h2 Contact Us
+                a#tel(href='callto:613-271-5995') 613-271-5995
+                br
+                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+            form(action="/searchForum",method="post",enctype="multipart/form-data")
+              div(align="right")
+                h1.titre Search
+                  input(type="text",name ="search")
+                  input#submit(type="submit", value="Submit")
+            br
+            div#chart_div
+    #contact 
+      contact.link Contact Us
+    script.
+      $("#contact").on('click', function(e) {
+          $('.lean_overlay_2').dialog({ modal: true,
+            buttons: [ 
+              { text: "Ok", 
+                click: function() { 
+                  $( this ).dialog( "close" ); 
+                  } 
+              } 
+            ]
+          });
+      });
+      
+    
+      

@@ -1,0 +1,609 @@
+var express = require('express');
+var app = express();
+var querystring = require("querystring");
+
+var zd = require("./benbria_zd");
+var db = require('./db');
+var https = require('https');
+var fs = require('fs');
+var moment = require('moment');
+
+db.init('db.json'); 
+var wf_db = db.db
+
+console.log("Zd :"+zd);
+app.use(express.cookieParser());
+app.use(express.session({secret: '1234567890QWERTY'}));
+// all environments
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+
+app.use(express.bodyParser({ keepExtensions:true, uploadDir: __dirname }));
+//app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(__dirname + '/public'));
+
+app.get('/index',function(req,res){
+	res.render("index", {showModal:'false'}); 
+});
+
+app.get('/',function(req,res){
+  res.render("index", {showModal:'false'}); 
+});
+
+app.get('/user', function(req,res){
+  res.render("user")
+});
+
+app.get('/addUser', function(req,res) { 
+  userAdd(req.query.username, req.query.password, req.query.organizations,req.query.forum,res);
+  res.render("user");
+});
+
+app.get('/select', function(req, res){
+  res.render ("select", {organizations:req.session.orgs, username:req.session.user} );
+});
+
+app.get('/knowledgeBase', function(req, res){
+ forum = zd.getForumDetails(req.session.forum);
+ var name = forum.name;
+ res.render("knowledgeBase",{name:name,gd: graphBase(req.session.forum, null)});
+});
+
+app.get('/changePass', function(req, res){
+  res.render ("changePass", {showModal: 'false', username: req.session.user, status: 0});
+});
+
+app.get('/organization',function(req,res){
+  req.session.organization=req.query.id;
+	res.render("organization",{gd:graphData(req.query.id, null)});
+});
+
+app.get('/create',function(req,res){
+  ticketNew (req.session.organization,res, false,0);  //organization, showModal, return from create
+});
+
+app.get('/topicAdd',function(req,res){
+  forum = zd.getForumDetails(req.session.forum);
+  var name = forum.name;
+  console.log(name);
+  res.render("topicAdd",{result: '', name:name, showModal:false});
+});
+
+app.get('/ticket',function(req,res){
+	ticketData(req.query.id,res,req.session.organization, false, 0);
+});
+
+app.get('/topic',function(req,res){
+ topicData(req.query.id, req.session.forum,res, false, 0);
+});
+
+app.post('/userCheck', function(req, res) {
+  console.log("request for 'CHECK USER' was a called.");
+  var username = req.body.username;
+  var password = req.body.password;
+  var record = wf_db[username];
+  console.log(JSON.stringify(wf_db))
+
+  if (record && record.password == password){
+      req.session.orgs=record.orgs;
+      req.session.user=username;
+      req.session.forum=record.forum;
+      console.log("ORG: "+JSON.stringify(record.orgs));
+      console.log("COUNT: "+Object.keys(record.orgs).length);
+      if (Object.keys(record.orgs).length == 1) {
+        var value = record.orgs[Object.keys(record.orgs)[0]]
+        console.log("VALUE: "+value);
+        req.session.organization = value;
+        res.render("organization",{gd:graphData(req.session.organization,null)});
+      } else {
+        return res.render("select",{organizations:record.orgs, username:username, res:res});
+      }
+  } else {
+    res.render("index", {showModal:'true'});
+  }
+});
+
+app.post('/searchRequest', function(req, res){
+  console.log("request for Search was called: "+req.body.search);
+  var done = function(gd) {
+    res.render("organization",{gd: gd});    
+  }
+  graphData(req.session.organization, req.body.search, done);
+});
+
+app.post('/searchForum', function(req, res){
+  console.log("request for Search Forum was called: "+req.body.search);
+  var done = function(name, gd) {
+    res.render("knowledgeBase",{name:name,gd: gd});    
+  }
+  graphBase(req.session.forum,req.body.search, done);
+});
+
+app.post('/changePass', function(req, res) {
+  console.log("request for 'Check Password Change' was a called.");
+  var status = 0;
+  var passCurr = req.body.currPass;
+  var passFirst = req.body.passFirst;
+  var passSecond = req.body.passSecond;
+  var username = req.session.user;
+  var record = wf_db[username];
+  var orgs = JSON.stringify(record.orgs);
+
+  if ( passCurr == record.password) {
+    if (passFirst == passSecond) {
+      wf_db[username]={"password":passFirst,"orgs":JSON.parse(orgs)}
+      status = 200;
+      res.render("changePass", {showModal: 'true', username: username, status: status});
+    } else {
+      status = 500;
+      res.render("changePass", {showModal: 'true', username: username, status: status});
+    }
+  } else {
+    status = 400;
+    res.render("changePass", {showModal: 'true', username: username, status: status});
+  }
+
+});
+
+var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
+  if (data.length == 0) 
+    return cb(null, res, req,tokens,id,subject,comment,user);
+  var f = data.shift();
+  if (f.originalFilename){
+    var split = f.path.split('/');
+    var filePass = split[split.length - 1];
+    url = encodeURIComponent(f.name);
+    
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
+        });
+  } else 
+    processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
+}
+
+var zendeskNewCB = function(err,res, req, tokens,orgId,subject,comment,userId){
+  if (err) return console.log(err);
+   var ticketJson = {
+    "ticket": {
+      "organization_id": orgId,
+      "requester_id": userId,
+      "subject": subject,
+      "comment": { 
+        "public":"true",
+        "body":comment,
+        "uploads": tokens
+      }
+    }
+  }
+  console.log('ORG: '+orgId+' SUB: '+subject+' COMMENT: '+comment+' USER: '+userId);
+  console.log(JSON.stringify(tokens));
+  zd.createTicket(ticketJson,function(result) {
+    console.log("results: " + result);
+    ticketNew(orgId, res, true, result); });
+}
+
+app.post('/ticketCreate', function(req, res) {
+  var orgId = req.body.organization;
+  var comment = req.body.comment;
+  var subject = req.body.subject;
+  var userId ='';
+  console.log('ORG: '+orgId);
+  
+  body = zd.getOrgUser(orgId, function(body) {
+    userId = body[0].id;
+
+    var data = [];
+    for (var i = 0; i <req.files.data.length; i++)
+      data.push(req.files.data[i]);
+    processNewReq(res,req,[],orgId,subject,comment,userId,data,zendeskNewCB);
+  });
+});
+
+var processReq = function(res,req,tokens,id,comment,user,data,cb){
+  if (data.length == 0) 
+    return cb(null, res, req,tokens,id,comment,user);
+  var f = data.shift();
+  if (f.originalFilename){
+    var split = f.path.split('/');
+    var filePass = split[split.length - 1];
+    url = encodeURIComponent(f.name);
+    
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processReq(res, req,tokens,id,comment,user,data,cb);
+        });
+  } else 
+    processReq(res, req,tokens,id,comment,user,data,cb);
+}
+
+var zendeskCB = function(err,res, req, tokens,id,comment,user){
+  if (err) return console.log(err);
+  var ticketJson = {
+    "ticket": {
+      "submitter_id": JSON.parse(user),
+      "comment": { 
+        "public":"true",
+        "body":comment,
+        "uploads": tokens
+      }
+    }
+  }
+  console.log('ticket data: '+JSON.stringify(ticketJson,null,2,true));
+  zd.updateTicket(id,ticketJson,function(result) {
+    console.log("results: " + result);
+    ticketData(id,res,req.session.organization, true, result); 
+  });
+}
+
+app.post('/ticketUpdate', function(req, res) {
+  var id = req.body.id;
+  var comment = req.body.comment;
+  var user = zd.getTicketAuthor(id);
+  var data = [];
+  for (var i = 0; i <req.files.data.length; i++)
+    data.push(req.files.data[i]);
+  processReq(res,req,[],id,comment,user,data,zendeskCB);
+});
+
+var processTop = function(res,req,tokens,subject,comment,data,cb){
+  if (data.length == 0) 
+    return cb(null, res, req,tokens,subject,comment);
+  var f = data.shift();
+  if (f.originalFilename){
+    var split = f.path.split('/');
+    var filePass = split[split.length - 1];
+    url = encodeURIComponent(f.name);
+    
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processTop(res, req,tokens,subject,comment,data,cb);
+        });
+  } else 
+    processTop(res, req,tokens,subject,comment,data,cb);
+}
+
+var topicCB = function(err,res, req, tokens, subject, comment){
+  if (err) return console.log(err);
+  forum = zd.getForumDetails(req.session.forum);
+  console.log(JSON.stringify(forum));
+  var name = forum.name;
+   var topicJson = {
+    "topic": {
+      "forum_id":req.session.forum,
+      "title":subject,
+      "body":comment,
+      "uploads": tokens
+    }
+  }
+  console.log( 'SUB: '+subject+' COMMENT: '+comment+' FORUM ID: '+req.session.forum);
+  console.log(JSON.stringify(topicJson));
+  zd.createTopic(topicJson,function(result) {
+    console.log("results: " + result);
+    res.render("topicAdd",{result: result, name:name,showModal:true});
+  });
+}
+
+app.post('/topicCreate', function(req, res) {
+  var orgId = req.body.organization;
+  var comment = req.body.comment;
+  var subject = req.body.subject;
+  var userId ='';
+  
+  var data = []; 
+  for (var i = 0; i <req.files.data.length; i++)
+    data.push(req.files.data[i]);
+  processTop(res,req,[],subject,comment,data,topicCB);
+});
+
+var processComm = function(res,req,tokens,id,comment,data,cb){
+  if (data.length == 0) 
+    return cb(null, res, req,tokens,id,comment);
+  var f = data.shift();
+  if (f.originalFilename){
+    var split = f.path.split('/');
+    var filePass = split[split.length - 1];
+    url = encodeURIComponent(f.name);
+    
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processComm(res, req,tokens,id,comment,data,cb);
+        });
+  } else 
+    processComm(res, req,tokens,id,comment,data,cb);
+}
+
+var commentCB = function(err,res, req, tokens,id,comment){
+  if (err) return console.log(err);
+  var commentJson = {
+    "topic_comment": {
+      "body":comment,
+      "uploads": tokens
+    }
+  }
+  console.log('comment data: '+JSON.stringify(commentJson,null,2,true));
+  zd.updateComment(id,commentJson,function(result) {
+    console.log("results: " + result);
+    topicData(id, req.session.forum, res, true, result); });
+}
+
+app.post('/commentUpdate', function(req, res) {
+  var id = req.body.id;
+  console.log("TOPIC ID: "+id);
+  var comment = req.body.comment;
+  var data = [];
+  for (var i = 0; i <req.files.data.length; i++)
+    data.push(req.files.data[i]);
+  processComm(res,req,[],id,comment,data,commentCB);
+});
+
+var userAdd = function(username, password, organizations, forum, response){
+  wf_db[username]={"password":password,"orgs":JSON.parse(organizations),"forum":forum}
+  console.log(JSON.stringify(db[username]))
+}
+
+var ticketNew = function(orgId,res,showModal, result) {
+  console.log("request for 'NEW TICKET' was called.");
+  console.log("ORGANIZATION: "+orgId);
+
+  res.render("create",{result: result, organization: orgId, showModal:showModal});
+}
+
+var ticketData = function(id,res, orgId,showModal, result) {
+  console.log("request for handler 'TicketData' was called.");
+	console.log("ticket Data arg: (id):" + id);
+  console.log("Organization Id: "+ orgId);
+  //var org=orgId;
+
+	zd.getAudit(id, function(body){
+		var comments = [];
+    var newAttachments = [];
+		var user = zd.getTicketAuthor(id);
+		for (var i = 0; i < body.count; i++) {
+      if (body.audits[i].via.channel == 'web') {
+        var author = zd.getUser(body.audits[i].author_id);
+      } else {
+        var author = zd.getUser(user);
+      }
+      //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
+      for (var j = 0; j < body.audits[i].events.length; j++) {
+        if (i == 0 && j== 0) {
+          var description = body.audits[i].events[0].body;
+          var dcreate_date = new Date(body.audits[i].created_at);
+          if (body.audits[i].events[j].attachments.length != 0) {
+            for (var k=0;k<body.audits[i].events[j].attachments.length; k++) {
+              att = {};
+              att.url = body.audits[i].events[j].attachments[k].content_url;
+              att.filename = body.audits[i].events[j].attachments[k].file_name;
+              newAttachments.push(att);
+            }
+          }
+        } else {
+          if (body.audits[i].events[j].type == "Comment") {
+            comment = {};
+            comment.attachments = [];
+            var comment_date = new Date(body.audits[i].created_at);
+           // console.log('A FULL EVENT: '+JSON.stringify(body.audits[i].events[j],null,2,true));
+            comment.created_at = comment_date;
+            comment.comment = body.audits[i].events[j].body;
+            comment.author_name = author; 
+            if (body.audits[i].events[j].attachments.length != 0) {
+              for (var k=0;k<body.audits[i].events[j].attachments.length; k++) {
+                console.log("URL: "+body.audits[i].events[j].attachments[k].content_url+" FILENAME: "+body.audits[i].events[j].attachments[k].file_name);
+                attachment = {};
+                attachment.url = body.audits[i].events[j].attachments[k].content_url;
+                attachment.filename = body.audits[i].events[j].attachments[k].file_name;
+                comment.attachments.push(attachment);
+              }
+            }
+            comments.push(comment);
+          }
+          switch (body.audits[i].events[j].field_name) {
+            case 'subject':
+              var subject = body.audits[i].events[j].value;
+              break;
+            case 'status':
+              state = {};
+              var update_date = new Date(body.audits[i].created_at);
+              state.created_at = update_date;
+              state.status = body.audits[i].events[j].value.toUpperCase();
+              break;
+            case 'priority':
+               if (body.audits[i].events[j].value) {
+                var priority = body.audits[i].events[j].value.toUpperCase();
+              } else {
+                var priority = "Value not yet assigned";
+              }
+              break;
+            case 'type':
+              if (body.audits[i].events[j].value) {
+                var type = body.audits[i].events[j].value.toUpperCase();
+                } else {
+                var type = "VALUE NOT ASSIGNED"
+              }
+              break;
+          }
+        }
+      }
+      
+    } 
+   // console.log("ALL COMMENT: "+JSON.stringify(comments,null,2,true));
+    res.render("ticket",{result: result, orgId:orgId, showModal:showModal,comments:comments, state:state, description:description,dcreate_date:dcreate_date,id:id,ticket:id,subject:subject,priority:priority,type:type, newAttachments:newAttachments});
+	});
+};
+
+var topicData = function(id, forum, res, showModal, result) {
+  console.log('TOPIC ID: '+id);
+  var body = zd.getTopicDetails(id);
+  var created_at = new Date(body.created_at);
+  var forum = zd.getForumDetails(forum);
+  console.log(JSON.stringify('BODY: '+body));
+  var name = forum.name;
+  var newAttachments = [];
+  if (body.attachments.length != 0) {
+    for (var k=0;k<body.attachments.length; k++) {
+      att = {};
+      att.url = body.attachments[k].content_url;
+      att.filename = body.attachments[k].file_name;
+      newAttachments.push(att);
+    }
+  }
+
+  if (body.comments_count > 0) {
+    comment = [];
+    zd.getTopicComments(id, function(comments) {
+      for(var i = 0; i<comments.length;i++) {
+          com={};
+          com.attachments = [];
+          console.log("DATE: "+JSON.stringify(comments[i].created_at));
+          com.comment = comments[i].body;
+          console.log("COMMENT: "+JSON.stringify(com.comment));
+          var comment_date = new Date(comments[i].created_at);
+          com.created_at = comment_date;
+
+          if (comments[i].attachments.length != 0) {
+              for (var k=0;k<comments[i].attachments.length; k++) {
+                console.log("URL: "+comments[i].attachments[k].url+" FILENAME: "+comments[i].attachments[k].file_name);
+                attachment = {};
+                attachment.url = comments[i].attachments[k].content_url;
+                attachment.filename = comments[i].attachments[k].file_name;
+                com.attachments.push(attachment);
+              }
+          }
+          comment.push(com);
+      }
+      res.render("topic",{id:id, subject:body.title, created_at:created_at,forum:name,body:body.body, newAttachments:newAttachments, comments:comment, result: result, showModal: showModal});
+    });
+  } else {
+    res.render("topic",{id:id, subject:body.title, created_at:created_at,forum:name,body:body.body, newAttachments:newAttachments, result: result, showModal: showModal});
+  }
+};
+
+var graphData = function(id, search, done) {
+  console.log("request for handler 'TICKET CHART' was called.");
+  var graphData = {};
+  graphData.cols = [];
+  graphData.rows = [];
+  graphData.cols[0] = {"id":"","label":"ID","type":"number"};
+  graphData.cols[1] = {"subject":"","label":"SUBJECT","type":"string"};
+  graphData.cols[2] = {"type":"","label":"TYPE","type":"string"};
+  graphData.cols[3] = {"customer":"","label":"CUSTOMER","type":"string"};
+  graphData.cols[4] = {"category":"","label":"CATEGORY","type":"string"};
+  graphData.cols[5] = {"requested":"","label":"REQUESTED","type":"string"};
+  graphData.cols[6] = {"solved":"","label":"LAST UPDATE","type":"string"};
+  graphData.cols[7] = {"status":"","label":"STATUS","type":"string"};
+  
+  console.log(id);
+  var j = 0;
+  if (search == null) {
+    var body = zd.getBody(id); 
+    var organization = zd.getOrganization(id);
+    if (body.length == 0) {
+      return false;
+    } else {
+      for (var i = body.length -1; i >= 0; i--) {
+       var fields = zd.getFields(body[i].id);
+       var request_date = new Date(body[i].created_at); 
+       var update_date = new Date(body[i].updated_at)
+       graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":fields[2],"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+        j++;
+      } 
+      return (graphData);
+    }  
+  } else { 
+    var string = search+' type:ticket organization:'+id;
+    zd.getQuery(string, function(body) {
+      var organization = zd.getOrganization(id);
+      if (body == 'Error: Zendesk Error (500): Internal Server Error') {
+        done(false);
+      }
+      if (body.length == 0) {
+        console.log('NOTHING FOUND IN TICKET SEARCH');
+        done(false);
+      } else {
+        for (var i = body.length -1; i >= 0; i--) {
+          var fields = zd.getFields(body[i].id);
+          var request_date = new Date(body[i].created_at); 
+          var update_date = new Date(body[i].updated_at)
+          console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+fields[2]+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
+          graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":fields[2],"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+          j++;
+        } 
+        done(graphData);
+      } 
+    });
+  }
+};
+
+var graphBase = function(forum, search, done) {
+  console.log("request for handler 'FORUM LIST' was called.");
+  var graphData = {};
+  graphData.cols = [];
+  graphData.rows = [];
+  graphData.cols[0] = {"id":"","label":"ID","type":"number"};
+  graphData.cols[1] = {"Title":"","label":"TITLE","type":"string"};
+  graphData.cols[2] = {"Create Date":"","label":"DATE CREATED","type":"string"};
+  graphData.cols[3] = {"Commented":"","label":"NUMBER OF COMMENTS","type":"number"};
+  console.log('HERE IS THE FORUM ID: '+forum);
+  var j = 0;
+  if (search == null) {
+    var body = zd.getTopics(forum);
+    if (body.length == 0) {
+     return false;
+    } else {
+      for (var i=0; i < body.length; i++) {
+       var request_date = new Date(body[i].created_at); 
+       graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].title,"f":null},{"v":request_date.toString(),"f":null},{"v":body[i].comments_count,"f":null},]};
+       j++;
+      } 
+     return(graphData);
+    }   
+  } else {
+    var string = search+' type:topic forum_id:'+forum;
+    forum = zd.getForumDetails(forum);
+    var name = forum.name;
+    zd.getQuery(string, function(body) {
+      if (body == 'Error: Zendesk Error (500): Internal Server Error') {
+        done(false);
+      }
+      if (body.length == 0) {
+        console.log('NOTHING FOUND IN FORUM SEARCH');
+        done(false);
+      } else {
+        for (var i=0; i < body.length; i++) {
+         var request_date = new Date(body[i].created_at); 
+         graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].title,"f":null},{"v":request_date.toString(),"f":null},{"v":body[i].comments_count,"f":null},]};
+         j++;
+        } 
+        done(name, graphData);
+      } 
+    });  
+  }
+};
+
+app.listen(3000);
