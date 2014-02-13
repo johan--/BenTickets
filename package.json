@@ -12,6 +12,7 @@
     "md5": "*",
     "MD5": "*",
     "nodemon": "*",
+    "moment":"*",
     "node-zendesk": "*"
   }
 }
