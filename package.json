@@ -11,6 +11,7 @@
     "stylus": "*",
     "md5": "*",
     "MD5": "*",
-    "nodemon": "*"
+    "nodemon": "*",
+    "node-zendesk": "*"
   }
 }

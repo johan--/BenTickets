@@ -6,6 +6,8 @@ BenTickets
 node with Jade and Express using node-zendesk for almost all the zendesk api calls except attachments (blakmatrix code doesn't work)
 SEE: https://github.com/blakmatrix/node-zendesk
 
+run npm install to add all dependencies
+
 create accounts in http://localhost:3000/user 
 entry stored in db.json<br><strong>NO DB REQUIRED</strong></br>
 <br>following fields required:</br>
@@ -30,6 +32,8 @@ UPDATE : benbria_zd.js for username, token, remoteUri
         remoteUri: 'https://COMPANY.zendesk.com/api/v2',
     });
 </pre>
+
+UPDATE : app.js look for all instances of ADD TOKEN HERE and update with your token
 
 
 Update email triggers for customer notification links (Email/Twitter) to point to your site
