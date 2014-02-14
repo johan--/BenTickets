@@ -54,7 +54,7 @@ block content
             p  
             strong CREATE DATE &nbsp&nbsp&nbsp#{created_at}
           fieldset
-            p!= body.replace(/\n/g, '<br />')
+            p!= body.replace(/\n/g, '')
             p
             - for (var i=0;i<newAttachments.length;i++) {
               a(href='#{newAttachments[i].url}')
@@ -67,7 +67,7 @@ block content
             - for (var i=0; i<comments.length; i++) {
               img(src='img/icons/comment.png',class='comment')
               &nbsp #{comments[i].created_at} 
-              p!= comments[i].comment.replace(/\n/g, '<br />')
+              p!= comments[i].comment.replace(/\n/g, '')
               p
               - for (var j = comments[i].attachments.length-1; j>=0; j--) {
                 a(href='#{comments[i].attachments[j].url}')

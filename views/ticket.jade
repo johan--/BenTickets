@@ -47,7 +47,7 @@ block content
           fieldset
             legend TICKET DETAILS:
             h1.subheading DESCRIPTION:
-            p!=description.replace(/\n/g, '<br />')
+            p!=description.replace(/\n/g, '')
             h1.subheading STATUS:
             bold START DATE &nbsp&nbsp&nbsp#{dcreate_date}
             p
@@ -68,7 +68,7 @@ block content
             - for (var i = comments.length-1; i>=0; i--) {
               img(src='img/icons/comment.png',class='comment') 
               &nbsp&nbsp&nbspDate: &nbsp&nbsp#{comments[i].created_at}
-              p!=comments[i].comment.replace(/\n/g, '<br />')
+              p!=comments[i].comment.replace(/\n/g, '')
               p
               bold Author:&nbsp#{comments[i].author_name}
               p

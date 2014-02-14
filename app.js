@@ -393,7 +393,7 @@ var ticketData = function(id,res, orgId,showModal, result) {
       //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
       for (var j = 0; j < body.audits[i].events.length; j++) {
         if (i == 0 && j== 0) {
-          var description = body.audits[i].events[0].body;
+          var description = body.audits[i].events[0].html_body;
           var dcreate_date = new Date(body.audits[i].created_at);
           if (body.audits[i].events[j].attachments.length != 0) {
             for (var k=0;k<body.audits[i].events[j].attachments.length; k++) {
@@ -410,7 +410,7 @@ var ticketData = function(id,res, orgId,showModal, result) {
             var comment_date = new Date(body.audits[i].created_at);
            // console.log('A FULL EVENT: '+JSON.stringify(body.audits[i].events[j],null,2,true));
             comment.created_at = comment_date;
-            comment.comment = body.audits[i].events[j].body;
+            comment.comment = body.audits[i].events[j].html_body;
             comment.author_name = author; 
             if (body.audits[i].events[j].attachments.length != 0) {
               for (var k=0;k<body.audits[i].events[j].attachments.length; k++) {
