@@ -12,23 +12,39 @@ db.init('db.json');
 var wf_db = db.db
 
 console.log("Zd :"+zd);
-app.use(express.cookieParser());
-app.use(express.session({secret: '1234567890QWERTY'}));
+app.use(express.cookieParser('1234567890QWERTY'));
+app.use(express.session())
+//app.use(express.session({secret: '1234567890QWERTY'}));
 // all environments
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+
+
 app.use(express.bodyParser({ keepExtensions:true, uploadDir: __dirname }));
+//app.use(express.bodyParser());
 //app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(__dirname + '/public'));
 
+app.get('/test', function(req,res){
+  res.render("test");
+});
+
 app.get('/index',function(req,res){
-	res.render("index", {showModal:'false'}); 
+  if (!(req.session.username)){
+    req.session.username='';
+    req.session.password='';
+  }
+	res.render("index", {showModal:'false',username:req.session.username,password:req.session.password}); 
 });
 
 app.get('/',function(req,res){
-  res.render("index", {showModal:'false'}); 
+  if (!(req.session.username)){
+    req.session.username='';
+    req.session.password='';
+  }
+  res.render("index", {showModal:'false',username:req.session.username,password:req.session.password}); 
 });
 
 app.get('/user', function(req,res){
@@ -56,7 +72,12 @@ app.get('/changePass', function(req, res){
 
 app.get('/organization',function(req,res){
   req.session.organization=req.query.id;
-	res.render("organization",{gd:graphData(req.query.id, null)});
+  for (var i in req.session.orgs) {
+      if (req.session.orgs[i] == req.session.organization)
+          req.session.orgname=i;
+  }
+  console.log ('ORGNAME: '+req.session.orgname);
+	res.render("organization",{gd:graphData(req.query.id, null), organization:req.session.organization, orgname:req.session.orgname});
 });
 
 app.get('/create',function(req,res){
@@ -80,8 +101,16 @@ app.get('/topic',function(req,res){
 
 app.post('/userCheck', function(req, res) {
   console.log("request for 'CHECK USER' was a called.");
+  console.log(JSON.stringify(req.body));
   var username = req.body.username;
   var password = req.body.password;
+  if (req.body.checkbox=='on') {
+    req.session.username=req.body.username;
+    req.session.password =req.body.password;
+  } else {
+    req.session.username='';
+    req.session.password ='';
+  }
   var record = wf_db[username];
   console.log(JSON.stringify(wf_db))
 
@@ -95,7 +124,9 @@ app.post('/userCheck', function(req, res) {
         var value = record.orgs[Object.keys(record.orgs)[0]]
         console.log("VALUE: "+value);
         req.session.organization = value;
-        res.render("organization",{gd:graphData(req.session.organization,null)});
+        req.session.orgname = Object.keys(record.orgs)[0];
+        console.log(req.session.orgname)
+        res.render("organization",{gd:graphData(req.session.organization,null), orgname:req.session.orgname});
       } else {
         return res.render("select",{organizations:record.orgs, username:username, res:res});
       }
@@ -107,7 +138,7 @@ app.post('/userCheck', function(req, res) {
 app.post('/searchRequest', function(req, res){
   console.log("request for Search was called: "+req.body.search);
   var done = function(gd) {
-    res.render("organization",{gd: gd});    
+    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname});    
   }
   graphData(req.session.organization, req.body.search, done);
 });
@@ -115,7 +146,7 @@ app.post('/searchRequest', function(req, res){
 app.post('/searchForum', function(req, res){
   console.log("request for Search Forum was called: "+req.body.search);
   var done = function(name, gd) {
-    res.render("knowledgeBase",{name:name,gd: gd});    
+      res.render("knowledgeBase",{name:name,gd: gd});    
   }
   graphBase(req.session.forum,req.body.search, done);
 });
@@ -143,6 +174,8 @@ app.post('/changePass', function(req, res) {
     status = 400;
     res.render("changePass", {showModal: 'true', username: username, status: status});
   }
+
+  console.log("STATUS: "+status);
 
 });
 
@@ -243,10 +276,15 @@ var zendeskCB = function(err,res, req, tokens,id,comment,user){
     }
   }
   console.log('ticket data: '+JSON.stringify(ticketJson,null,2,true));
-  zd.updateTicket(id,ticketJson,function(result) {
-    console.log("results: " + result);
-    ticketData(id,res,req.session.organization, true, result); 
-  });
+  if (comment) {
+    zd.updateTicket(id,ticketJson,function(result) {
+      console.log("results: " + result);
+      ticketData(id,res,req.session.organization, true, result); 
+    });
+  } else {
+    result = 422;
+    ticketData(id,res,req.session.organization, true, result);
+  }
 }
 
 app.post('/ticketUpdate', function(req, res) {
@@ -547,6 +585,7 @@ var graphData = function(id, search, done) {
         done(false);
       } else {
         for (var i = body.length -1; i >= 0; i--) {
+        //for (var i=0;i<body.length; i++) {
           var fields = zd.getFields(body[i].id);
           var request_date = new Date(body[i].created_at); 
           var update_date = new Date(body[i].updated_at)
@@ -593,7 +632,7 @@ var graphBase = function(forum, search, done) {
       }
       if (body.length == 0) {
         console.log('NOTHING FOUND IN FORUM SEARCH');
-        done(false);
+        done(name, false);
       } else {
         for (var i=0; i < body.length; i++) {
          var request_date = new Date(body[i].created_at); 

@@ -5,6 +5,9 @@ block content
   script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
   script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
   link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+  link(el="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
+  script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
   meta(name='description', content='Benbria Support Tickets')
   script.
        
@@ -17,9 +20,6 @@ block content
       
     function drawTable() {
       var gd = !{JSON.stringify(gd)};
-     /* for (var i=0;i<gd.rows.length;i++) {
-        console.log('REQUEST DATE: '+gd.rows[1].c[5].v+' UPDATE DATE: '+gd.rows[1].c[6].v);
-      } */
       console.log(gd); 
       
       var chart = new google.visualization.DataTable(gd); 
@@ -39,58 +39,57 @@ block content
       }
     }
   body
-    #header
-      #headerwrapper
-        a(href='/')
-          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
-    #container
-      div
-        div
-          #gauche
-            h3 MENU
-            ul
-              li
-                a(href='create')
-                  img.icon(src='img/icons/add.png', hieght="25", width="25")
-                a(href='create') Add a Ticket 
-              li
-                a(href='select')
-                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
-                a(href='select') Select Organization
-              li
-                a(href='changePass')
-                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
-                a(href='KnowledgeBase') KnowledgeBase
-              li
-                a(href='index')
-                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
-                a(href='index') Log Out
-          #milieu
-            .lean_overlay_2(style="display:none")
-              div
-                h2 Contact Us
-                a#tel(href='callto:613-271-5995') 613-271-5995
-                br
-                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
-            form(action="/searchRequest",method="post",enctype="multipart/form-data")
-              div(align="right")
-                h1.titre Search
-                  input(type="text",name ="search")
-                  input#submit(type="submit", value="Submit")
-            br
-            div#chart_div
-    #contact 
-      contact.link Contact Us
+    nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
 
-  script.
-    $("#contact").on('click', function(e) {
-        $('.lean_overlay_2').dialog({ modal: true,
-          buttons: [ 
-            { text: "Ok", 
-              click: function() { 
-                $( this ).dialog( "close" ); 
-                } 
-            } 
-          ]
-        });
-    });
+      // Brand and toggle get grouped for better mobile display
+      .navbar-header
+        button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        
+
+      // Collect the nav links for toggling
+      .collapse.navbar-collapse.navbar-ex1-collapse
+        ul.nav.navbar-nav.navbar-center
+          li.active
+            a(href="#") View Tickets
+          li
+            a(href="create") Add a Ticket
+          li
+            a(href="select") Change Organization
+          li
+            a(href="KnowledgeBase") KnowledgeBase
+          li
+            a(href="index") Log Out
+        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
+    .jumbotron
+        h1.titre Tickets for Organization: #{orgname} 
+
+    .container
+      form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
+        div(align="right")
+          .form-group
+            label(for="inputSearch") Search
+              &nbsp
+            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search String")
+          button.btn.btn-primary Search
+      div#chart_div
+    #contact 
+      a.button(data-toggle="modal" href="#myModal") Contact Us
+
+    div(id="myModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title CONTACT US
+          .modal-body
+              a#tel(href='callto:613-271-5995') 613-271-5995
+              br
+              a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+

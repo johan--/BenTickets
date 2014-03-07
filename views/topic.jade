@@ -6,126 +6,167 @@ block content
   script (src="//tinymce.cachefly.net/4.0/tinymce.min.js")
   script(src="javascripts/uploadView.js")
   link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+  link(el="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
+  script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
   script.
     var body = !{JSON.stringify(body)};
     console.log(body);
     
   body
-    #header
-      #headerwrapper
-        a(href='/')
-          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
-    #container
-      div
-        div
-          #gauche
-            h3 MENU
-            ul
-              li
-                a(href='create')
-                  img.icon(src='img/icons/add.png', hieght="25", width="25")
-                a(href='topicAdd') Add a Topic
-              li
-                a(href='changePass')
-                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
-                a(href='KnowledgeBase') KnowledgeBase
-              li
-                a(href='select')
-                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
-                a(href='select') Select Organization
-              li
-                a(href='index')
-                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
-                a(href='index') Log Out
-        #milieu
-          .lean_overlay_2(style="display:none")
-              div
-                h2 Contact Us
-                a#tel(href='callto:613-271-5995') 613-271-5995
-                br
-                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
-          h2 Benbria Topic ID #{id}
-          p
-           h1.titre SUBJECT LINE: 
-            span #{subject}
-          .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
-          fieldset
-            legend TOPIC DETAILS:
-            p  
-            strong CREATE DATE &nbsp&nbsp&nbsp#{created_at}
-          fieldset
-            p!= body.replace(/\n/g, '')
-            p
-            - for (var i=0;i<newAttachments.length;i++) {
-              a(href='#{newAttachments[i].url}')
-                    img#submit(src='img/icons/file.png',class='view')
-              a(href='#{newAttachments[i].url}', target='_blank') #{newAttachments[i].filename}&nbsp&nbsp&nbsp
-            -}
-          - if (comments) { 
-          fieldset
-            h1.subheading COMMENTS: 
-            - for (var i=0; i<comments.length; i++) {
-              img(src='img/icons/comment.png',class='comment')
-              &nbsp #{comments[i].created_at} 
-              p!= comments[i].comment.replace(/\n/g, '')
-              p
-              - for (var j = comments[i].attachments.length-1; j>=0; j--) {
-                a(href='#{comments[i].attachments[j].url}')
-                  img#submit(src='img/icons/file.png',class='view') 
-                  a(href='#{comments[i].attachments[j].url}', target='_blank') #{comments[i].attachments[j].filename}
+    nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
+
+      // Brand and toggle get grouped for better mobile display
+      .navbar-header
+        button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        
+
+      // Collect the nav links for toggling
+      .collapse.navbar-collapse.navbar-ex1-collapse
+        ul.nav.navbar-nav.navbar-center
+          li
+            a(href="topicAdd") Add a topic
+          li
+            a(href="select") Change Organization
+          li
+            a(href="KnowledgeBase") KnowledgeBase
+          li
+            a(href="index") Log Out
+        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
+    .jumbotron
+      h1.titre Benbria Topic ID #{id}
+    .row
+      .col-md-7.col-md-offset-1
+        .container
+          .row
+            .col-md-10
+              legend SUBJECT LINE: #{subject}
+          .row
+            .col-md-10
+              h1.subheading TOPIC DETAILS:
+          .row
+            .col-md-10  
+              strong CREATE DATE &nbsp&nbsp&nbsp#{created_at}
+          .row
+            .col-md-10
+              p!= body.replace(/\n/g, '')
+          .row
+            .col-md-10
+              - for (var i=0;i<newAttachments.length;i++) {
+                a(href='#{newAttachments[i].url}')
+                  .glyphicon.glyphicon-paperclip
+                a(href='#{newAttachments[i].url}', target='_blank') #{newAttachments[i].filename}&nbsp&nbsp&nbsp
               -}
-              - if ( i != comments.length -1) {
+          - if (comments) { 
+          .row
+            .col-md-10
+              h1.subheading COMMENTS: 
+              - for (var i=0; i<comments.length; i++) {
+                .glyphicon.glyphicon-comment
+                &nbsp #{comments[i].created_at} 
+                p!= comments[i].comment.replace(/\n/g, '')
+                p
+                - for (var j = comments[i].attachments.length-1; j>=0; j--) {
+                  a(href='#{comments[i].attachments[j].url}')
+                    .glyphicon.glyphicon-paperclip
+                  a(href='#{comments[i].attachments[j].url}', target='_blank') #{comments[i].attachments[j].filename}
+                -}
                 p.seperator
               -}
-            -}
           -}
-            form(action="/commentUpdate",method="post",enctype="multipart/form-data")
-              input(type="hidden", name="id", id="comment", value=id)
-              fieldset
-                legend Add Comment:
-                p type your comment below:
-                textarea(rows="10",cols="100",name ="comment")
-                p 
-                .fileinputs
-                  #ifl(style='display:none')
-                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
-                  p
-                    img(src='img/icons/attach.png',class='cover',onclick="$('#ii').click()")
+          .row
+            .col-md-10
+              form(action="/commentUpdate",method="post",enctype="multipart/form-data")
+                input(type="hidden", name="id", id="comment", value=id)
+                fieldset
+                  legend ADD COMMENT:
+                  .row
+                      .col-md-6 type your comment below:
+                  .row
+                      .col-md-10
+                        textarea(rows="10",cols="100",name ="comment")
+                  .row
+                      .col-md-6 
+                          .fileinputs
+                            #ifl(style='display:none')
+                              input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+                  .row
+                    .col-md-2
+                      .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()") 
+                      &nbsp
+                      strong
+                        a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
                   ul#view_ifl
-                br
-                input#submit(type="submit", value="Submit")
+                  .row
+                    .col-md-2
+                      button.btn.btn-primary Submit
+                  .row
+                        .col
+                          br
+                          br
+      .col-md-2
+        br
+        .well
+          strong
+            a(href="#" id="rules" data-trigger="hover" data-title="Forum Rules" rel="popover" data-placement="left" data-content="This is an unmoderated forum. \n discretion is advised and material may be removed by forum moderator" data-original-tile="Attahments") 
+              p Rules of Benbria Forum
+
           
     #contact 
-      contact.link Contact Us
-  script.
-    $("#contact").on('click', function(e) {
-        $('.lean_overlay_2').dialog({ modal: true,
-          buttons: [ 
-            { text: "Ok", 
-              click: function() { 
-                $( this ).dialog( "close" ); 
-                } 
-            } 
-          ]
-        });
-    });
-    if (#{showModal}) {
-      if (#{result} == 201) {
-        $('.lean_overlay').html('Your comment was successfully updated.');
-      }
-      else {
-        $('.lean_overlay').html('Error updating comment. Please contact the Benbria Support.');
-      }
-      $('.lean_overlay').dialog({ modal: true, 
-          buttons: [ 
-            { text: "Ok", 
-              click: function() { 
-                $( this ).dialog( "close" ); 
-              } 
-            } 
-          ] 
-        });
-    }
+      a.button(data-toggle="modal" href="#myModal") Contact Us
+
+    div(id="myModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title CONTACT US
+          .modal-body
+              a#tel(href='callto:613-271-5995') 613-271-5995
+              br
+              a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="ticketModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              h1 
+                center TOPIC UPDATE
+          .modal-body
+            if (result == 201)
+              p 
+                center 
+                  h4 Topic was successfully updated
+            if (result ==422)
+                p 
+                  center 
+                    h4 You must provide detail comment to update a Topic
+            else
+              p
+                center
+                  h4 Error updating. Please contact the administrator
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+    #retModal(data-toggle="modal" href="#ticketModal")
+    script.
+      if (!{showModal}) $("#retModal").click()
+
+      $(function ()  
+      { $("#rules").popover();  
+      }); 
+
+      $(function ()  
+      { $("#attach").popover();  
+      });
   
 
 

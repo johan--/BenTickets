@@ -5,7 +5,7 @@ var __zendesk_file = "zd.json";
 
 var interval =  60 * 1000; // secs
 var client = zendesk.createClient({
-    username: 'PUT YOUR USERNAME/EMAIL HERE',
+    username: 'PUT YOUR USERNAME/EMAIL',
     token: 'PUT YOUR TOKEN HERE',
     remoteUri: 'https://COMPANY.zendesk.com/api/v2',
 });

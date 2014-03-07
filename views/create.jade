@@ -5,97 +5,127 @@ block content
   script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
   script(src="javascripts/uploadView.js")
   link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+  link(el="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
+  script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
   
   body
-    #header
-      #headerwrapper
-        a(href='/')
-          img#benbria(src='img/benbria2.png', hieght="90", width="90", alt='Benbria Logo')
-    #container
-      div
-        div
-          #gauche
-            h3 MENU
-            ul
-              li
-                a(href='create')
-                  img.icon(src='img/icons/delete.png', hieght="25", width="25")
-                a(href='create') Clear Ticket
-              li
-                a(href='organization?id='+organization)
-                  img.icon(src='img/icons/back.png', hieght="25", width="25")
-                a(href='organization?id='+organization) Back to Tickets
-              li
-                a(href='select')
-                  img.icon(src='img/icons/organization.png', hieght="25", width="25")
-                a(href='select') Select Organization
-              li
-                a(href='changePass')
-                  img.icon(src='img/icons/knowledge.png', hieght="25", width="25")
-                a(href='KnowledgeBase') KnowledgeBase
-              li
-                a(href='index')
-                  img.icon(src='img/icons/logoff.png', hieght="25", width="25")
-                a(href='index') Log Out
-        #milieu
-          h1.titre Benbria Ticketing
-          .lean_overlay_2(style="display:none")
-              div
-                h2 Contact Us
-                a#tel(href='callto:613-271-5995') 613-271-5995
-                br
-                a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
-          p
+    nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
+
+      // Brand and toggle get grouped for better mobile display
+      .navbar-header
+        button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        
+
+      // Collect the nav links for toggling
+      .collapse.navbar-collapse.navbar-ex1-collapse
+        ul.nav.navbar-nav.navbar-center
+          li
+            a(href="create") Reset Ticket
+          li.active
+            a(href="#") Add a Ticket
+          li
+            a(href="organization?id="+organization) Select Another Ticket
+          li
+            a(href="select") Change Organization
+          li
+            a(href="KnowledgeBase") KnowledgeBase
+          li
+            a(href="index") Log Out
+        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
+    .jumbotron
+        h1.titre Add a Ticket 
+    .row
+      .col-md-7.col-md-offset-1
+        .container
           h2 TICKET INFORMATION: 
-            span Please enter a ticket
-          .lean_overlay(style="dislay:none")= "WARNING: Ticket has NO DATA."
-          
-                    
           form(action="/ticketCreate",method="post",enctype="multipart/form-data")
             input(type="hidden", name="organization", id="organization", value=organization)
             fieldset
-              legend Add Ticket:
-              p Brief Description of problem:
-              input.extend(rows="1", cols="1000", name ="subject")
-              p Detailed Description of problem:
-              textarea(rows="10", cols="100", name ="comment")
-              p
-              .fileinputs
-                #ifl(style='display:none')
-                  input#ii(name='data',type='file',class='file',onChange='updateIfl()')
-                p
-                  img#imgId(src='img/icons/attach.png',class='cover',onclick="$('#ii').click()")
-                ul#view_ifl
+              legend New Ticket:
+              .row
+                .col-md-6 Brief Description of problem:
+              .row
+                .col-md-10
+                  input.extend(rows="1", cols="1000", name ="subject")
+              .row
+                .col-md-6 Detailed Description of problem:
+              .row
+                .col-md-10
+                  textarea(rows="10", cols="100", name ="comment")
+              .row
+                .col-md-6
+                  .fileinputs
+                    #ifl(style='display:none')
+                      input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+              .row
+                .col-md-2
+                    .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()") 
+                    &nbsp
+                    strong
+                      a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
+              ul#view_ifl
               br
-              input#submit(type="submit", value="Submit")
+              button.btn.btn-primary Submit
+      .col-md-4
+        p 
+        .well
+          strong 
+            legend Please use the following guidelines when entering a new ticket
+            ul
+              li Please provide a short and clear description in the 'Topic Title'
+              li Provide steps to reproduce your problem or question on using the software
+              li Provide basic details on your system (Operating System, Browser Version)
+              li Please attach screenshots to help us assist in resolving issues or answering questions
+            strong NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments
     #contact 
-      contact.link Contact Us
-  script.
-    $("#contact").on('click', function(e) {
-        $('.lean_overlay_2').dialog({ modal: true,
-          buttons: [ 
-            { text: "Ok", 
-              click: function() { 
-                $( this ).dialog( "close" ); 
-                } 
-            } 
-          ]
-        });
-    });
-    if (#{showModal}) {
-      if (#{result} == 201) {
-        $('.lean_overlay').html('Ticket was successfully created. Please wait about 2 minutes before ticket is available');
-      }
-      else {
-        $('.lean_overlay').html('Error updating. Please contact the administrator.');
-      }
-      $('.lean_overlay').dialog({ modal: true, 
-          buttons: [ 
-            { text: "Ok", 
-              click: function() { 
-                $( this ).dialog( "close" ); 
-                } 
-            } 
-          ] 
-        });
-    }
+      a.button(data-toggle="modal" href="#myModal") Contact Us
+
+    div(id="myModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title CONTACT US
+          .modal-body
+              a#tel(href='callto:613-271-5995') 613-271-5995
+              br
+              a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="ticketModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              h1 
+                center TICKET CREATE
+          .modal-body
+          - if (result == 201)
+            p 
+              center 
+                h4 Ticket was successfully created. Please wait about 2 minutes before ticket is available
+          - if (result !=201)
+            p 
+              center 
+                h4 Error updating. Please contact the administrator
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+    #retModal(data-toggle="modal" href="#ticketModal")
+    script.
+      if (!{showModal}) $("#retModal").click()
+
+      $(function ()  
+      { $("#attach").popover();  
+      });
+
+
+    
+
