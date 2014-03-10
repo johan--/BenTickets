@@ -21,7 +21,7 @@ block content
         if (orgId)
           a.navbar-brand(href="create") NEW TICKET
          else
-          a.navbar-brand(href="select" ) NEW TICKET
+          a.navbar-brand(href="index" ) NEW TICKET
 
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
@@ -30,10 +30,11 @@ block content
             a(href="#" class="dropdown-toggle" data-toggle="dropdown") Forums
               b.caret
             ul.dropdown-menu
-              li
-                a(href="KnowledgeBase") Forum Topics
-              li
-                a(href="topicAdd") Add a Topic
+              if (orgId)
+                li
+                  a(href="KnowledgeBase") Forum Topics
+                li
+                  a(href="topicAdd") Add a Topic
           li.dropdown
             a(href="#" class="dropdown-toggle" data-toggle="dropdown") Tickets
               b.caret
@@ -49,8 +50,9 @@ block content
             a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
               b.caret
             ul.dropdown-menu
-              li
-                a(href="changePass") Change Password
+              if (orgId)
+                li
+                  a(href="changePass") Change Password
               li
                 a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
