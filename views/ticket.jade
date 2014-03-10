@@ -18,8 +18,10 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="create") NEW TICKET
-        
+        if (orgId)
+          a.navbar-brand(href="create") NEW TICKET
+         else
+          a.navbar-brand(href="select" ) NEW TICKET
 
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
@@ -36,10 +38,11 @@ block content
             a(href="#" class="dropdown-toggle" data-toggle="dropdown") Tickets
               b.caret
             ul.dropdown-menu
-              li
-                a(href="organization?id="+orgId) Select a Ticket
-              li
-                a(href="create") Add New Ticket
+              if (orgId)
+                li
+                  a(href="organization?id="+orgId) Select a Ticket
+                li
+                  a(href="create") Add New Ticket
               li
                 a(href="select") Select Organization
           li.dropdown
