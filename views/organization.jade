@@ -48,22 +48,38 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        a.navbar-brand(href="create") NEW TICKET
         
 
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
         ul.nav.navbar-nav.navbar-center
-          li.active
-            a(href="#") View Tickets
-          li
-            a(href="create") Add a Ticket
-          li
-            a(href="select") Change Organization
-          li
-            a(href="KnowledgeBase") KnowledgeBase
-          li
-            a(href="index") Log Out
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Forums
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="KnowledgeBase") Forum Topics
+              li
+                a(href="topicAdd") Add a Topic
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Tickets
+              b.caret
+            ul.dropdown-menu
+              li.active
+                a(href="#") Select a Ticket
+              li
+                a(href="create") Add New Ticket
+              li
+                a(href="select") Select Organization
+          li.dropdown
+            a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="changePass") Change Password
+              li
+                a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
     .jumbotron
         h1.titre Tickets for Organization: #{orgname} 

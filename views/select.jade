@@ -8,17 +8,8 @@ block content
     link(el="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
     script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
     meta(name='description', content='Benbria Support Tickets')
-    script.
-      var org = !{JSON.stringify([organizations])};
-      console.log(org);
-      function SETcookie(){
-        document.cookie="Selected="+document.getElementById('myList').selectedIndex;
-        document.cookie="Organization="+document.getElementById('myList').value;}
-      function GETcookie(){
-        if (document.cookie){
-          eval(document.cookie);
-          document.getElementById('myList').selectedIndex=Selected;}}
-  body(onLoad="GETcookie()")
+        
+  body()
     nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
 
       // Brand and toggle get grouped for better mobile display
@@ -28,20 +19,42 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        if (orgId)
+          a.navbar-brand(href="create") NEW TICKET
+        else
+          a.navbar-brand(href="#" id="login" data-title="Benbria Tickets" data-trigger="click" rel="popover" data-placement="bottom" data-content="You must first select your Organization. Please select Location below" data-original-tile="ticket") NEW TICKET
         
 
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
         ul.nav.navbar-nav.navbar-center
-          li.active
-            a(href="#") Change Organization
-          li
-            a(href="changePass") Change Password
-          li
-            a(href="KnowledgeBase") KnowledgeBase
-          li
-            a(href="index") Log Out
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Forums
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="KnowledgeBase") Forum Topics
+              li
+                a(href="topicAdd") Add a Topic
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Tickets
+              b.caret
+            ul.dropdown-menu
+              if (orgId)
+                li
+                  a(href="organization?id="+orgId) Select a Ticket
+                li
+                  a(href="create") Add New Ticket
+              li.active
+                a(href="select") Select Organization
+          li.dropdown
+            a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="changePass") Change Password
+              li
+                a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
     .jumbotron
         h1.titre Welcome to Benbria Support! 
@@ -73,6 +86,33 @@ block content
               a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
           .modal-footer
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="ticketModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              h1 
+                center SELECT ORGANIZATION
+          .modal-body
+            p 
+              center 
+                h4 You must first select an organization before adding a ticket
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+    #retModal(data-toggle="modal" href="#ticketModal")
+    script.
+      console.log(!{showModal})
+      if (!{showModal}) $("#retModal").click()
+
+      $(function ()  
+      { $("#login").popover();  
+      });
+
+      var org = !{JSON.stringify([organizations])};
+      console.log(org);
+  
         
     
     

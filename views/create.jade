@@ -19,35 +19,49 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="http://benbria.com" target="_blank") BENBRIA
+        a.navbar-brand(href="#") NEW TICKET
         
 
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
         ul.nav.navbar-nav.navbar-center
-          li
-            a(href="create") Reset Ticket
-          li.active
-            a(href="#") Add a Ticket
-          li
-            a(href="organization?id="+organization) Select Another Ticket
-          li
-            a(href="select") Change Organization
-          li
-            a(href="KnowledgeBase") KnowledgeBase
-          li
-            a(href="index") Log Out
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Forums
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="KnowledgeBase") Forum Topics
+              li
+                a(href="topicAdd") Add a Topic
+          li.dropdown
+            a(href="#" class="dropdown-toggle" data-toggle="dropdown") Tickets
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="organization?id="+organization) Select a Ticket
+              li.active
+                a(href="#") Add New Ticket
+              li
+                a(href="select") Select Organization
+          li.dropdown
+            a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href="changePass") Change Password
+              li
+                a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
     .jumbotron
         h1.titre Add a Ticket 
     .row
       .col-md-7.col-md-offset-1
         .container
-          h2 TICKET INFORMATION: 
+          h2.titre TICKET INFORMATION: 
           form(action="/ticketCreate",method="post",enctype="multipart/form-data")
             input(type="hidden", name="organization", id="organization", value=organization)
             fieldset
-              legend New Ticket:
+              h2 New Ticket:
               .row
                 .col-md-6 Brief Description of problem:
               .row
@@ -57,7 +71,7 @@ block content
                 .col-md-6 Detailed Description of problem:
               .row
                 .col-md-10
-                  textarea(rows="10", cols="100", name ="comment")
+                  textarea(rows="10", cols="154", name ="comment")
               .row
                 .col-md-6
                   .fileinputs
@@ -72,17 +86,21 @@ block content
               ul#view_ifl
               br
               button.btn.btn-primary Submit
-      .col-md-4
+      .col-md-2.col-md-offset-1
         p 
-        .well
-          strong 
-            legend Please use the following guidelines when entering a new ticket
-            ul
-              li Please provide a short and clear description in the 'Topic Title'
-              li Provide steps to reproduce your problem or question on using the software
-              li Provide basic details on your system (Operating System, Browser Version)
-              li Please attach screenshots to help us assist in resolving issues or answering questions
-            strong NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments
+        .panel.panel-danger
+          center.panel-heading Recommended ticket guidelines
+          .panel-body
+            strong 
+              ul
+                li Please provide a short and clear description in the 'Brief Description of Problem'
+                li Provide steps to reproduce your problem or question on using the software
+                li Provide basic details on your system (Operating System, Browser Version)
+                li Please attach screenshots to help us assist in resolving issues or answering questions
+              p NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments
+              br
+              br
+
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 
