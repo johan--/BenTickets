@@ -8,8 +8,19 @@ var https = require('https');
 var fs = require('fs');
 var moment = require('moment');
 
+
 db.init('db.json'); 
 var wf_db = db.db
+
+var nodemailer = require('nodemailer');
+
+var smtpTransport = nodemailer.createTransport("SMTP",{
+    service: "Gmail",
+    auth: {
+        user: "benbria.testing",
+        pass: "gBBtest1"
+    }
+});
 
 console.log("Zd :"+zd);
 app.use(express.cookieParser('1234567890QWERTY'));
@@ -34,7 +45,7 @@ app.get('/index',function(req,res){
     req.session.username='';
     req.session.password='';
   }
-	res.render("index", {showModal:'false',username:req.session.username,password:req.session.password}); 
+	res.render("index", {showModal:'false',regModal:'false', passModal:'false', username:req.session.username,password:req.session.password}); 
 });
 
 app.get('/',function(req,res){
@@ -42,7 +53,7 @@ app.get('/',function(req,res){
     req.session.username='';
     req.session.password='';
   }
-  res.render("index", {showModal:'false',username:req.session.username,password:req.session.password}); 
+  res.render("index", {showModal:'false',regModal:'false', passModal:'false', username:req.session.username,password:req.session.password}); 
 });
 
 app.get('/user', function(req,res){
@@ -72,6 +83,10 @@ app.get('/knowledgeBase', function(req, res){
 
 app.get('/changePass', function(req, res){
   res.render ("changePass", {showModal: 'false', username: req.session.user, status: 0, orgId:req.session.organization});
+});
+
+app.get('/register', function(req, res) {
+  res.render("register", {regModal: 'false'});
 });
 
 app.get('/organization', function(req,res){
@@ -105,6 +120,69 @@ app.get('/topic',function(req,res){
  topicData(req.query.id, req.session.forum,res, false, 0, req.session.organization);
 });
 
+app.post('/passwordReset', function(req, res) {
+  console.log("request for 'PASSWORD RESET' was called");
+  var record = wf_db[req.body.email];
+  
+  if (record) {
+    var orgs = JSON.stringify(record.orgs);
+    len = 8;
+    charSet = req.body.email || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var randomString = '';
+    for (var i = 0; i < len; i++) {
+         var randomPoz = Math.floor(Math.random() * charSet.length);
+         randomString += charSet.substring(randomPoz,randomPoz+1);
+    }
+    wf_db[req.body.email]={"password":randomString,"orgs":JSON.parse(orgs)}
+    var mailOptions = {
+      from: "benbria.support@gmail.com",
+      to: req.body.email,
+      subject: "Password Reset Request",
+      text: "The password for the user: "+req.body.email+"\n to the password:"+randomString,
+    }
+    smtpTransport.sendMail(mailOptions, function(error, response){
+      if(error) {
+          console.log(error);
+      } else {
+          console.log("Message sent: " + response.message);
+      }
+      smtpTransport.close(); // shut down the connection pool, no more messages
+      req.session.username='';
+      req.session.password ='';
+      result=200;
+      res.render("index", {showModal:'false', regModal:'false', passModal:'true', result: result,username:req.session.username, password:req.session.password});
+    });
+  } else {
+    result=400;
+    res.render("index", {showModal:'false', regModal:'false', passModal:'true', result: result,username:req.session.username, password:req.session.password});
+  }
+});
+
+app.post('/registerUser', function(req, res) {
+  console.log("request for 'REGISTER USER' was callled")
+  var mailOptions = {
+    from: "benbria.support@gmail.com",
+    to: "drobern@benbria.com",
+    subject: "New Account Request",
+    text: "The following account request was made.\nName: "+req.body.firstname+" "+req.body.lastname+" "+"\nEmail: "+req.body.email+"\nOrganizations: "+req.body.organization,
+  }
+  smtpTransport.sendMail(mailOptions, function(error, response){
+    if(error){
+        console.log(error);
+        result = 400;
+    }else{
+        console.log("Message sent: " + response.message);
+        result = 200;
+    }
+    smtpTransport.close(); // shut down the connection pool, no more messages
+    req.session.username='';
+    req.session.password ='';
+    res.render("index", {showModal:'false', regModal:'true', passModal:'false',result: result,username:req.session.username, password:req.session.password});
+  });
+
+});
+
+
 app.post('/userCheck', function(req, res) {
   console.log("request for 'CHECK USER' was a called.");
   console.log(JSON.stringify(req.body));
@@ -137,7 +215,7 @@ app.post('/userCheck', function(req, res) {
         return res.render("select",{organizations:record.orgs, username:username, res:res, showModal:'false'});
       }
   } else {
-    res.render("index", {showModal:'true',username:req.session.username, password:req.session.password});
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
   }
 });
 
@@ -194,7 +272,7 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -255,7 +333,7 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -312,7 +390,7 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -368,7 +446,7 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {

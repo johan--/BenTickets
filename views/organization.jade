@@ -48,7 +48,7 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="create") NEW TICKET
+        a.navbar-brand(href="create") CREATE A TICKET
         
 
       // Collect the nav links for toggling
@@ -67,17 +67,17 @@ block content
               b.caret
             ul.dropdown-menu
               li.active
-                a(href="#") Select a Ticket
+                a(href="#") View Tickets
               li
-                a(href="create") Add New Ticket
-              li
-                a(href="select") Select Organization
+                a(href="create") Create New Ticket
           li.dropdown
             a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
               b.caret
             ul.dropdown-menu
               li
                 a(href="changePass") Change Password
+              li
+                a(href="select") Change Organization
               li
                 a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
@@ -88,9 +88,7 @@ block content
       form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
         div(align="right")
           .form-group
-            label(for="inputSearch") Search
-              &nbsp
-            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search String")
+            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets")
           button.btn.btn-primary Search
       div#chart_div
     #contact 

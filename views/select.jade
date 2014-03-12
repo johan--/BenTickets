@@ -22,7 +22,7 @@ block content
         if (orgId)
           a.navbar-brand(href="create") NEW TICKET
         else
-          a.navbar-brand(href="#" id="login" data-title="Benbria Tickets" data-trigger="click" rel="popover" data-placement="bottom" data-content="You must first select your Organization. Please select Location below" data-original-tile="ticket") NEW TICKET
+          a.navbar-brand(href="#" id="login" data-title="Benbria Tickets" data-trigger="click" rel="popover" data-placement="bottom" data-content="You must first select your Organization. Please select Location below" data-original-tile="ticket") BENBRIA SUPPORT
         
 
       // Collect the nav links for toggling
@@ -62,7 +62,7 @@ block content
       .col-md-8.col-md-offset-3
         form(class="form-horizontal",action="organization",method="get")
           fieldset
-            legend Organization Selection
+            legend Select your Organization
             label Location &nbsp&nbsp
             select(id="myList",name="id",onChange="SETcookie()")
               - for (var x in organizations)

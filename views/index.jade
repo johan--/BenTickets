@@ -20,9 +20,9 @@ block content
           span.icon-bar
           span.icon-bar
         if (orgId)
-          a.navbar-brand(href="create") NEW TICKET
+          a.navbar-brand(href="create") CREATE A TICKET
         else
-          a.navbar-brand(href="#" id="login" data-title="Benbria Tickets" data-trigger="click" rel="popover" data-placement="bottom" data-content="You must first login to create a new Ticket. Please login" data-original-tile="ticket") NEW TICKET
+          a.navbar-brand(href="#" id="login" data-title="Benbria Tickets" data-trigger="click" rel="popover" data-placement="bottom" data-content="You must first login to create a new Ticket. Please login or Register for an Account" data-original-tile="ticket") BENBRIA SUPPORT
         
 
       // Collect the nav links for toggling
@@ -37,9 +37,11 @@ block content
           .col-sm-3
             input.form-control(type="text" placeholder="Email address" name="username" value="#{username}")
         .form-group
-          label.col-sm-2.control-label(for="inputPassword3") Password
+          label.col-sm-2.control-label(for="inputPassword3") Password 
           .col-sm-3
             input.form-control(type="password" placeholder="Password" name="password" value="#{password}")
+          .col-sm-2
+            a(href="#passwordModal" data-toggle="modal") Forgot Password?
         .form-group
           .col-sm-offset-2.col-sm-10
             .checkbox
@@ -49,8 +51,64 @@ block content
         .form-group
           .col-sm-offset-2.col-sm-10.controls
              button.btn.btn-primary(type="submit") Sign in
+      .row
+        .col-sm-4.col-sm-offset-2
+          a(href="#registerModal" data-toggle="modal") Register for an Account
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
+
+    div(id="passwordModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              center 
+                strong PASSWORD RESET
+          .modal-body
+              form.form.form-horizontal(role="form" action="/passwordReset",method="post",enctype="multipart/form-data")
+                .form-group
+                  label.col-sm-4.control-label(for="inputEmail") Email Address:
+                  .col-sm-6
+                      input.form-control(type="email" placeholder="Email Address" name ="email")
+                .form-group
+                  .col-sm-offset-4.col-sm-6.controls
+                    button.btn.btn-primary(type="submit") Submit Request
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="registerModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              center 
+                strong REGISTRATION FORM
+          .modal-body
+              form.form.form-horizontal(role="form" action="/registerUser",method="post",enctype="multipart/form-data")
+                .form-group
+                  label.col-sm-4.control-label(for="inputFirstname") First Name:
+                  .col-sm-6
+                    input.form-control(type="text" placeholder="First Name" name ="firstname")
+                .form-group
+                  label.col-sm-4.control-label(for="inputLastname") Last Name:
+                  .col-sm-6
+                    input.form-control(type="text" placeholder="Last Name" name="lastname")
+                .form-group
+                  label.col-sm-4.control-label(for="inputEmail") Email Address:
+                  .col-sm-6
+                      input.form-control(type="email" placeholder="Email Address" name ="email")
+                .form-group
+                  label.col-sm-4.control-label(for="inputOrgs") Organization(s), seperate by a comma:
+                  .col-sm-6
+                      input.form-control(type="text" placeholder="Organizations i.e. companyA, CompanyB" name ="organization")
+                .form-group
+                  .col-sm-offset-4.col-sm-6.controls
+                    button.btn.btn-primary(type="submit") Submit Request
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
 
     div(id="myModal" class="modal fade in")
       .modal-dialog
@@ -81,9 +139,67 @@ block content
                 a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
           .modal-footer
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="statusModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              h1 
+                center REGISTRATION STATUS
+          .modal-body
+          - if (result == 200)
+            p 
+              center 
+                h4 Registration Succesfully sent
+                P An email will be sent shortly with your login credentials
+          - if (result ==400)
+            p 
+              center 
+                h4 Errror during Registration please contact mailto:support@benbria.com
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    div(id="passRetModal" class="modal fade in")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            .button.close(data-dismiss="modal" aria-hidden="true") X
+            .modal-title 
+              h1 
+                center PASSWORD STATUS RESET
+          .modal-body
+            if (result == 200)
+              p 
+                center 
+                  h4 Password Succesfully Reset
+                  P An email will be sent shortly with your login credentials
+            if (result == 400)
+              p 
+                center 
+                  h4 Email is incorrect, plese try again or contact 
+                  p 
+                    center mailto:support@benbria.com
+          .modal-footer
+              button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+
+    #passModal(data-toggle="modal" href="#passRetModal")
+    #regModal(data-toggle="modal" href="#statusModal")
     #retModal(data-toggle="modal" href="#userModal")
     script.
+
+      console.log(!{result}+" status: "+!{passModal})
+
       if (!{showModal}) $("#retModal").click()
+
+      if (!{regModal})  $("#registerModal").modal("hide") 
+
+      if (!{regModal}) $("#regModal").click() 
+
+      if (!{passModal})  $("#passwordModal").modal("hide") 
+
+      if (!{passModal}) $("#passModal").click() 
 
       $(function ()  
       { $("#login").popover();  
