@@ -272,7 +272,7 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -333,7 +333,7 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -390,7 +390,7 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/Itoken:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
@@ -446,7 +446,7 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
     var filePass = split[split.length - 1];
     url = encodeURIComponent(f.name);
     
-    var cmd_line = 'curl -u drobern@benbria.com/token:Ih9Mt18JBYSF54gHmDkQIhtZTCkzYafWWWlFsNWJ -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
     console.log(cmd_line);
     var execShell = require('child_process').exec;
     execShell(cmd_line, function (error, stdout, stderr) {
