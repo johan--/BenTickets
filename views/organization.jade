@@ -84,13 +84,12 @@ block content
     .jumbotron
         h1.titre Tickets for Organization: #{orgname} 
 
-    .container
-      form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
-        div(align="right")
-          .form-group
-            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets")
-          button.btn.btn-primary Search
-      div#chart_div
+    form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
+      div(align="right")
+        .form-group
+          input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets")
+        button.btn.btn-primary Search
+    div#chart_div
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 

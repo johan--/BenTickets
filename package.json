@@ -6,6 +6,7 @@
     "start": "nodemon app.js"
   },
   "dependencies": {
+    "email-templates":"*",
     "express": "3.4.0",
     "jade": "*",
     "stylus": "*",
@@ -13,6 +14,7 @@
     "MD5": "*",
     "nodemon": "*",
     "moment":"*",
-    "node-zendesk": "*"
+    "node-zendesk": "*",
+    "nodemailer":"*"
   }
 }

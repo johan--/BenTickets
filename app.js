@@ -7,7 +7,7 @@ var db = require('./db');
 var https = require('https');
 var fs = require('fs');
 var moment = require('moment');
-
+var generatePassword = require('password-generator');
 
 db.init('db.json'); 
 var wf_db = db.db
@@ -17,8 +17,8 @@ var nodemailer = require('nodemailer');
 var smtpTransport = nodemailer.createTransport("SMTP",{
     service: "Gmail",
     auth: {
-        user: "benbria.testing",
-        pass: "gBBtest1"
+        user: "xxx@google.com",
+        pass: "xxxxx"
     }
 });
 
@@ -30,7 +30,7 @@ app.use(express.session())
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
-app.use(express.bodyParser({ keepExtensions:true, uploadDir: __dirname }));
+app.use(express.bodyParser({ keepExtensions:true, uploadDir: __dirname + '/public/downloads' }));
 //app.use(express.bodyParser());
 //app.use(express.methodOverride());
 app.use(app.router);
@@ -126,19 +126,13 @@ app.post('/passwordReset', function(req, res) {
   
   if (record) {
     var orgs = JSON.stringify(record.orgs);
-    len = 8;
-    charSet = req.body.email || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var randomString = '';
-    for (var i = 0; i < len; i++) {
-         var randomPoz = Math.floor(Math.random() * charSet.length);
-         randomString += charSet.substring(randomPoz,randomPoz+1);
-    }
-    wf_db[req.body.email]={"password":randomString,"orgs":JSON.parse(orgs)}
+    password=generatePassword()
+    wf_db[req.body.email]={"password":password,"orgs":JSON.parse(orgs)}
     var mailOptions = {
       from: "benbria.support@gmail.com",
       to: req.body.email,
       subject: "Password Reset Request",
-      text: "The password for the user: "+req.body.email+"\n to the password:"+randomString,
+      text: "The password for the user: "+req.body.email+"\nto the password:"+password,
     }
     smtpTransport.sendMail(mailOptions, function(error, response){
       if(error) {
@@ -269,7 +263,7 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
   var f = data.shift();
   if (f.originalFilename){
     var split = f.path.split('/');
-    var filePass = split[split.length - 1];
+    var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
     
     var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
@@ -330,7 +324,8 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
   var f = data.shift();
   if (f.originalFilename){
     var split = f.path.split('/');
-    var filePass = split[split.length - 1];
+    var filePass = 'public/downloads/'+split[split.length - 1];
+    console.log('THE FILE: '+ filePass);
     url = encodeURIComponent(f.name);
     
     var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
@@ -387,7 +382,7 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
   var f = data.shift();
   if (f.originalFilename){
     var split = f.path.split('/');
-    var filePass = split[split.length - 1];
+    var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
     
     var cmd_line = 'curl -u drobern@benbria.com/Itoken:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
@@ -443,7 +438,7 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
   var f = data.shift();
   if (f.originalFilename){
     var split = f.path.split('/');
-    var filePass = split[split.length - 1];
+    var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
     
     var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
@@ -653,9 +648,9 @@ var graphData = function(id, search, done) {
       for (var i = body.length -1; i >= 0; i--) {
        var fields = zd.getFields(body[i].id);
        var request_test = new Date(body[i].created_at); 
-       var request_date = moment(request_test).format("dddd, MMMM Do YYYY, h:mm:ss a");
+       var request_date = moment(request_test).format("MMMM Do YYYY");
        var update_test = new Date(body[i].updated_at)
-       var update_date = moment(update_test).format("dddd, MMMM Do YYYY, h:mm:ss a");
+       var update_date = moment(update_test).format("MMMM Do YYYY");
        graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":fields[2],"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
         j++;
       } 
