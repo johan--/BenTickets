@@ -129,7 +129,7 @@ app.post('/passwordReset', function(req, res) {
     password=generatePassword()
     wf_db[req.body.email]={"password":password,"orgs":JSON.parse(orgs)}
     var mailOptions = {
-      from: "benbria.support@gmail.com",
+      from: "support@gmail.com",
       to: req.body.email,
       subject: "Password Reset Request",
       text: "The password for the user: "+req.body.email+"\nto the password:"+password,
@@ -155,8 +155,8 @@ app.post('/passwordReset', function(req, res) {
 app.post('/registerUser', function(req, res) {
   console.log("request for 'REGISTER USER' was callled")
   var mailOptions = {
-    from: "benbria.support@gmail.com",
-    to: "drobern@benbria.com",
+    from: "support@gmail.com",
+    to: "name@name.com",
     subject: "New Account Request",
     text: "The following account request was made.\nName: "+req.body.firstname+" "+req.body.lastname+" "+"\nEmail: "+req.body.email+"\nOrganizations: "+req.body.organization,
   }
