@@ -33,6 +33,19 @@ UPDATE : benbria_zd.js for username, token, remoteUri
     });
 </pre>
 
+UPDATE: Email settings in apps.js to point to your email account (default for gmail)
+<pre>
+    var smtpTransport = nodemailer.createTransport("SMTP",{
+        service: "Gmail",
+        auth: {
+            user: "xxx@google.com",
+            pass: "xxxxx"
+        }
+   });
+</pre>
+
+UPDATE: 'To:' for the post to registerUser search for - <pre> to: "name@name.com", </pre>
+
 UPDATE : app.js look for all instances of ADD TOKEN HERE and update with your token
 
 
