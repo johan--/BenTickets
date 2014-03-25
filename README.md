@@ -4,7 +4,7 @@ BenTickets
 <strong>Framework for creating your own Ticketing site with Forums via the $20/year Zendesk account via API</strong>
 
 node with Jade and Express using node-zendesk for almost all the zendesk api calls except attachments (blakmatrix code doesn't work)
-SEE: https://github.com/blakmatrix/node-zendesk
+SEE: https://github.com/drobern/node-zendesk
 
 run npm install to add all dependencies
 
@@ -33,10 +33,23 @@ UPDATE : benbria_zd.js for username, token, remoteUri
     });
 </pre>
 
+UPDATE: Email settings in apps.js to point to your email account (default for gmail)
+<pre>
+    var smtpTransport = nodemailer.createTransport("SMTP",{
+        service: "Gmail",
+        auth: {
+            user: "xxx@google.com",
+            pass: "xxxxx"
+        }
+   });
+</pre>
+
+UPDATE: 'To:' for the post to registerUser search for - <pre> to: "name@name.com", </pre>
+
 UPDATE : app.js look for all instances of ADD TOKEN HERE and update with your token
 
 
 Update email triggers for customer notification links (Email/Twitter) to point to your site
 
-TODO: add session check for link to ticket and force user to login if not found
+
 
