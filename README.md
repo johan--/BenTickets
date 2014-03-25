@@ -51,5 +51,5 @@ UPDATE : app.js look for all instances of ADD TOKEN HERE and update with your to
 
 Update email triggers for customer notification links (Email/Twitter) to point to your site
 
-TODO: add session check for link to ticket and force user to login if not found
+
 
