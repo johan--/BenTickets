@@ -51,42 +51,41 @@ block content
                 a(href="select") Change Organization
               li
                 a(href="index") Log Out
-        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
+        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
     .jumbotron
         h1.titre Add a Ticket 
     .row
       .col-md-7.col-md-offset-1
-        .container
-          h2.titre TICKET INFORMATION: 
-          form(action="/ticketCreate",method="post",enctype="multipart/form-data")
-            input(type="hidden", name="organization", id="organization", value=organization)
-            fieldset
-              h2 New Ticket:
-              .row
-                .col-md-6 Brief Description of problem:
-              .row
-                .col-md-10
-                  input.extend(rows="1", cols="1000", name ="subject")
-              .row
-                .col-md-6 Detailed Description of problem:
-              .row
-                .col-md-10
-                  textarea(rows="10", cols="154", name ="comment")
-              .row
-                .col-md-6
-                  .fileinputs
-                    #ifl(style='display:none')
-                      input#ii(name='data',type='file',class='file',onChange='updateIfl()')
-              .row
-                .col-md-2
-                    .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()") 
-                    &nbsp
-                    strong
-                      a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
-              ul#view_ifl
-              br
-              button.btn.btn-primary Submit
-      .col-md-3.col-md-offset-1
+        h2.titre TICKET INFORMATION: 
+        form(action="/ticketCreate",method="post",enctype="multipart/form-data")
+          input(type="hidden", name="organization", id="organization", value=organization)
+          fieldset
+            h2 New Ticket:
+            .row
+              .col-md-6 Brief Description of problem:
+            .row
+              .col-md-10
+                input.extend(rows="1", cols="1000", name ="subject")
+            .row
+              .col-md-6 Detailed Description of problem:
+            .row
+              .col-md-10
+                textarea.form-control(rows="10", name ="comment")
+            .row
+              .col-md-6
+                .fileinputs
+                  #ifl(style='display:none')
+                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+            .row
+              .col-md-2
+                  .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()") 
+                  &nbsp
+                  strong
+                    a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
+            ul#view_ifl
+            br
+            button.btn.btn-primary Submit
+      .col-md-4
         p 
         .panel.panel-danger
           center.panel-heading Recommended ticket guidelines

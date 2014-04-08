@@ -79,63 +79,62 @@ block content
                 a(href="select") Select Organization
               li
                 a(href="index") Log Out
-        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria2.png", hieght="40", width="40", alt="Benbria Logo")
+        img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
     .jumbotron
         h1.titre Add a Topic
     .row
       .col-md-7.col-md-offset-1
-        .container
-          h2 Benbria Forum : #{name}
-          
-          form(action="/topicCreate",method="post",enctype="multipart/form-data")
-            .row
-              .col-md-10
-                input(type="hidden", name="organization", id="organization", value=organization)
-                fieldset
-                  legend Add A New Topic:     
-            .row 
-              .col-md-6 Topic Title:
-            .row
-              .col-md-10
-                input.extend(rows="1", cols="1000", name ="subject")
+        h2 Benbria Forum : #{name}
+        
+        form(action="/topicCreate",method="post",enctype="multipart/form-data")
+          .row
+            .col-md-10
+              input(type="hidden", name="organization", id="organization", value=organization)
+              fieldset
+                legend Add A New Topic:     
+          .row 
+            .col-md-6 Topic Title:
+          .row
+            .col-md-10
+              input.extend(rows="1", cols="1000", name ="subject")
+              br
+          .row
+            .col-md-6 Detailed Description of topic:
+          .row
+            .col-md-10
+              textarea(rows="30", cols="100",  name ="comment")
+          .row
+            .col-md-6
+              .fileinputs
+                #ifl(style='display:none')
+                  input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+          .row
+            .col-md-2
+              .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()")
+              &nbsp
+              strong
+                a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
+          ul#view_ifl
+          .row
+            .col-md-2
+              button.btn.btn-primary Submit
+          .row
+              .col
                 br
-            .row
-              .col-md-6 Detailed Description of topic:
-            .row
-              .col-md-10
-                textarea(rows="30", cols="100", wrap="soft", name ="comment")
-            .row
-              .col-md-6
-                .fileinputs
-                  #ifl(style='display:none')
-                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
-            .row
-              .col-md-2
-                .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()")
-                &nbsp
-                strong
-                  a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
-            ul#view_ifl
-            .row
-              .col-md-2
-                button.btn.btn-primary Submit
-            .row
-                .col
-                  br
-                  br
-      .col-md-3.col-md-offset-1
-        p 
-        .panel.panel-danger
-          center.panel-heading Forum Rules of Conduct
-          .panel-body
-            strong 
-              ul
-                li Forums are a place for the community to share their experiences and ideas
-                li Forums are not moderated
-                li Respect for other contributors is required
-                li Benbria reserves the right to remove topics and comments deemed unacceptable
-              br
-              br
+                br
+      .col-md-4 
+          p 
+          .panel.panel-danger
+            center.panel-heading Forum Rules of Conduct
+            .panel-body
+              strong 
+                ul
+                  li Forums are a place for the community to share their experiences and ideas
+                  li Forums are not moderated
+                  li Respect for other contributors is required
+                  li Benbria reserves the right to remove topics and comments deemed unacceptable
+                br
+                br
         
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us

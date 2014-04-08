@@ -3,7 +3,7 @@ var fs = require('fs');
 
 var __zendesk_file = "zd.json";
 
-var interval =  60 * 1000; // secs
+var interval =  60 * 500; // secs
 var client = zendesk.createClient({
     username: 'PUT YOUR USERNAME/EMAIL',
     token: 'PUT YOUR TOKEN HERE',
@@ -28,12 +28,6 @@ client.organizations.list(function (err, statusList, body, responseList, resultL
     zd.user = body;
 }) 
 
-/* client.topics.list(function (err, statusList, body, responseList, resultList) {
-  if (err) {
-    return;
-  }
-  zd.topics = body;
-}) */
 
 exports.getAudit = function(id, callback) {
     client.tickets.exportAudit(id, function (err, statusList, body, responseList, resultList) {
