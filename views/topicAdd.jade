@@ -11,15 +11,21 @@ block content
   link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
   script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
   script.
+    if(tinyMCE.editors.length > 0) {
+      tinymce.remove();
+      console.log("GOT HERE DAVE!!!!!!!!")
+    }
+    //tinymce.execCommand('mceRemoveControl',true,'editor_id');
+    tinymce.execCommand('mceAddEditor',false,'#my_editor');
+
+
     tinymce.init({
-        selector:"textarea",
-        plugins: [
-                "advlist autolink autosave link image lists charmap print preview hr",
-                "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-                "table contextmenu directionality emoticons template textcolor paste textcolor"
-        ],
+      selector: '#my_editor',
+      relative_urls: true,
+        plugins: ["image print preview lists searchreplace table contextmenu textcolor"],
+        toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
         toolbar1: "newdocument fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
-        toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent | undo redo | link unlink image media code | inserttime preview | forecolor backcolor table | charmap emoticons | print fullscreen",
+        toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent | undo redo | image media code | inserttime preview | forecolor backcolor table | charmap emoticons | print fullscreen",
 
         menubar: true,
         toolbar_items_size: 'small',
@@ -33,7 +39,39 @@ block content
                 {title: 'Table styles'},
                 {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
         ],
-    });
+
+        init_instance_callback : function(editor) {
+          console.log("Editor: " + editor.id + " is now initialized.");
+        },
+
+        file_browser_callback: function(field_name, url, type, win) {
+          $("#inputFile").click(); 
+          console.log("FIELD NAME: "+field_name+" IMAGE TYPE: "+type+" WIN: "+win);
+          id = win.document.getElementById(field_name).id;
+          console.log("ID: "+id);
+          $("#inputFile").change (function() {
+            console.log("FIELD NAME: "+id);
+            console.log("FILE PATH FROM TINYMCE "+$(this).val());
+            console.log("WIN ELEMENT"+win.document.getElementById(field_name));
+            var arr = $(this).val().split("\\");
+            console.log("Array0: "+arr[0]+" Array1: "+arr[1]+" Array2: "+arr[2]);
+            win.document.getElementById(id).value = arr[2];
+            var fd = new FormData;
+            fd.append('file', $("#inputFile")[0].files[0]);
+
+            $.ajax({
+              type: 'post',
+              processData: false,
+              contentType: false,
+              url: "upload",
+              data: fd,
+              success: function(data,textStatus,XHR) {
+                  
+              } 
+            }) 
+          });
+        }
+      });
   body
     nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
 
@@ -102,26 +140,29 @@ block content
             .col-md-6 Detailed Description of topic:
           .row
             .col-md-10
-              textarea(rows="30", cols="100",  name ="comment")
-          .row
-            .col-md-6
-              .fileinputs
-                #ifl(style='display:none')
-                  input#ii(name='data',type='file',class='file',onChange='updateIfl()')
-          .row
-            .col-md-2
-              .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()")
-              &nbsp
-              strong
-                a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
-          ul#view_ifl
-          .row
-            .col-md-2
-              button.btn.btn-primary Submit
-          .row
-              .col
-                br
-                br
+              textarea(rows="30", cols="100",  name ="comment", id="my_editor")
+              iframe(id="form_target", name="form_target", style="display:none")
+              form(id="my_form", action="/upload", target="form_target", method="post", enctype="multipart/form-data", style="width:0px;height:0;overflow:hidden")
+                input(name="image", type="file", class="file", id="inputFile")
+            .row
+              .col-md-6
+                .fileinputs
+                  #ifl(style='display:none')
+                    input#ii(name='data',type='file',class='file',onChange='updateIfl()')
+            .row
+              .col-md-2
+                .glyphicon.glyphicon-folder-open(class='cover',onclick="$('#ii').click()")
+                &nbsp
+                strong
+                  a(href="#" class="cover" onclick="$('#ii').click()" id="attach" data-trigger="hover" data-title="Attachments" rel="popover" data-placement="top" data-content="NOTE: Only 5 attachments are allowed per post, please add comment for additional attachments" data-original-tile="attachment") Attach a File
+            ul#view_ifl
+            .row
+              .col-md-2
+                button.btn.btn-primary Submit
+            .row
+                .col
+                  br
+                  br
       .col-md-4 
           p 
           .panel.panel-danger
@@ -177,7 +218,7 @@ block content
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
     #retModal(data-toggle="modal" href="#ticketModal")
     script.
-      if (!{showModal}) $("#retModal").click()
+     if (!{showModal}) $("#retModal").click()
 
       $(function ()  
       { $("#rules").popover();  

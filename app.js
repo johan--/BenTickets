@@ -17,8 +17,8 @@ var nodemailer = require('nodemailer');
 var smtpTransport = nodemailer.createTransport("SMTP",{
     service: "Gmail",
     auth: {
-        user: "xxx@google.com",
-        pass: "xxxxx"
+        user: "xxxx@google.ca",
+        pass: "xxxxxx"
     }
 });
 
@@ -420,6 +420,25 @@ var topicCB = function(err,res, req, tokens, subject, comment){
   });
 }
 
+app.post('/upload', function(req, res) {
+   //console.log(require('util').inspect(req.files, {depth:null}));
+   fs.readFile(req.files.file.path, function (err, data) {
+    var imageName = req.files.file.originalFilename
+    console.log("IMAGE NAME: "+imageName);
+    if(!imageName){
+      console.log("There was an error")
+      res.redirect("/");
+      res.end();
+    } else {
+      var newPath = __dirname + '/public/' + imageName;
+      fs.writeFile(newPath, data, function (err) {
+        console.log("THE FILE IS HERE: "+newPath);
+        res.send(200);
+      });
+    }
+  });
+});
+
 app.post('/topicCreate', function(req, res) {
   var orgId = req.body.organization;
   var comment = req.body.comment;
@@ -482,6 +501,21 @@ app.post('/commentUpdate', function(req, res) {
 var userAdd = function(username, password, organizations, forum, response){
   wf_db[username]={"password":password,"orgs":JSON.parse(organizations),"forum":forum}
   console.log(JSON.stringify(db[username]))
+  
+  var mailOptions = {
+      from: "support@gmail.com",
+      to: username,
+      subject: "Your account had been created",
+      text: "Welcome to Benbria Online ticket at http://xxxx.xxxx.com.\nPlease note your \nUsername: "+username+"\nPassword: "+password+"\nThank you\n xxxxx Team" ,
+  }
+  smtpTransport.sendMail(mailOptions, function(error, response){
+    if(error) {
+        console.log(error);
+    } else {
+        console.log("Message sent: " + response.message);
+    }
+    smtpTransport.close(); // shut down the connection pool, no more messages
+  });
 }
 
 var ticketNew = function(orgId,res,showModal, result) {
