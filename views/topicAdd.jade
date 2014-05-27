@@ -131,7 +131,7 @@ block content
               fieldset
                 legend Add A New Topic:     
           .row 
-            .col-md-6 Topic Title:
+            .col-md-6 Topic Question:
           .row
             .col-md-10
               input.extend(rows="1", cols="1000", name ="subject")
@@ -210,7 +210,7 @@ block content
                 p 
                   center 
                     h4 You must enter a Subject and Detailed Description to submit a new Topic
-            else
+            if (result != 201 && result != 422)
               p
                 center
                   h4 Error updating. Please contact the administrator

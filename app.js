@@ -556,11 +556,11 @@ var ticketData = function(id,res, orgId,showModal, result) {
             }
           }
         } else {
-          if (body.audits[i].events[j].type == "Comment") {
+          if (body.audits[i].events[j].type == "Comment" && body.audits[i].events[j].public==true) {
             comment = {};
             comment.attachments = [];
             var comment_date = new Date(body.audits[i].created_at);
-           // console.log('A FULL EVENT: '+JSON.stringify(body.audits[i].events[j],null,2,true));
+            console.log('A FULL EVENT: '+JSON.stringify(body.audits[i].events[j],null,2,true));
             comment.created_test = comment_date;
             comment.created_at = moment(comment.created_test).format("dddd, MMMM Do YYYY, h:mm:ss a")
             comment.comment = body.audits[i].events[j].html_body;
