@@ -3,7 +3,7 @@ var fs = require('fs');
 
 var __zendesk_file = "zd.json";
 
-var interval =  60 * 500; // secs
+var interval =  60 * 50; // secs
 var client = zendesk.createClient({
     username: 'PUT YOUR USERNAME/EMAIL',
     token: 'PUT YOUR TOKEN HERE',
@@ -145,6 +145,22 @@ var update = function(){
     }
     zd.forums = body;
   })
+  client.organizations.list(function (err, statusList, body, responseList, resultList) {
+    if (err) {
+        console.log(err);
+        return;
+      }
+      zd.organization = body;
+  })
+
+   client.users.list(function (err, statusList, body, responseList, resultList) {
+    if (err) {
+        console.log(err);
+        return;
+      }
+      zd.user = body;
+  })
+
 };
 
 update();

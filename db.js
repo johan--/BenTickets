@@ -14,6 +14,6 @@ exports.init = function(db_file){
     function(err) {
       if(err) console.log(err)
       else console.log("... saving of " + __file );
-  })}, 5*30*1000); 
+  })}, 5*30*10); 
 };
 
