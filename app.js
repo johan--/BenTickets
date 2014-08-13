@@ -354,6 +354,7 @@ var zendeskCB = function(err,res, req, tokens,id,comment,user){
     "ticket": {
    //  "submitter_id":user,
       "requester_id": user,
+   //   "author_id" : user,
       "comment": { 
         "public":"true",
         "body":comment,
@@ -378,10 +379,7 @@ app.post('/ticketUpdate', function(req, res) {
   var id = req.body.id;
   var comment = req.body.comment;
   body = zd.getOrgUser(orgId, function(body) {
-   /* userId = body[0].id;
-    console.log("THE USER DATA1: "+JSON.stringify(body[0],null,2,true)+" THE USER DATA2: "+JSON.stringify(body[1],null,2,true));
-    console.log("THE USER NAME: "+req.session.user); */
-    for (var i = 0; i<body.length; i++) {
+   for (var i = 0; i<body.length; i++) {
       if (body[i].email == req.session.user) {
         userId = body[i].id;
       }
@@ -391,13 +389,6 @@ app.post('/ticketUpdate', function(req, res) {
       data.push(req.files.data[i]);
     processReq(res,req,[],id,comment,userId,data,zendeskCB);
   });
-
-
- /* var user = zd.getTicketAuthor(id);
-  var data = [];
-  for (var i = 0; i <req.files.data.length; i++)
-    data.push(req.files.data[i]);
-  processReq(res,req,[],id,comment,user,data,zendeskCB); */
 });
 
 var processTop = function(res,req,tokens,subject,comment,data,cb){
@@ -553,18 +544,20 @@ var ticketData = function(id,res, orgId,showModal, result) {
   console.log("request for handler 'TicketData' was called.");
 	console.log("ticket Data arg: (id):" + id);
   console.log("Organization Id: "+ orgId);
-  //var org=orgId;
+  var author='';
 
 	zd.getAudit(id, function(body){
+    var rule = 'F';
 		var comments = [];
     var newAttachments = [];
 		var user = zd.getTicketAuthor(id);
     for (var i = 0; i < body.count; i++) {
-      // console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
+      //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
      // INITIALIZED THE COMMENTS OBJECT BEFORE POPULATING
       comment = {};
       comment.attachments = [];
       for (var j = 0; j < body.audits[i].events.length; j++) {
+        //console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
         // THE FIRST RECORD IN THE EVENTS AUDIT IS ALWAYS HANDLED AS ORIGINAL TICKET
         if (i == 0 && j== 0) {
           var description = body.audits[i].events[0].html_body;
@@ -580,17 +573,26 @@ var ticketData = function(id,res, orgId,showModal, result) {
           }
         }
         // THE NOTIFICATION EVENT WITH BODY HAVING 'YOUR REQUEST' CONTAINS THE AUTHOR ID OF THE COMMENT
-        if (body.audits[i].events[j].type == "Notification" && body.audits[i].events[j].body.match(/Your request/g) && i != 0) {
+        if (body.audits[i].events[j].type == "Notification") {
+          if (body.audits[i].events[j].body.match(/Your request/g)) {
             // WEB CHANNEL REPRESENTS ENTRY FROM ZENDESK SO USE AUTHOR ID AS ALL COMMENTS ARE ENTERED AS ADMIN
             if (body.audits[i].via.channel == 'web') {
               var author = zd.getUser(body.audits[i].author_id);
               comment.author_name=author;
             // TICKETS FROM tickets.benbria.com ARE FROM THE API CHANNEL GET FIRST ELEMENT FROM RECIPIENT ARRAY
             } else {
-              console.log("RECIPIENT: "+body.audits[i].events[j].recipients[0]);
+              console.log("RECIPIENT API: "+body.audits[i].events[j].recipients[0]);
               var author = zd.getUser(body.audits[i].events[j].recipients[0]);
               comment.author_name=author;
-            } 
+            }
+          } else {
+            // IF NOTIFICATION CAME FROM EMAIL RESPONSE GET THE AUTHOR ID
+            if (body.audits[i].via.channel == 'email') { 
+              var author = zd.getUser(body.audits[i].author_id);
+              console.log('THE AUTHOR: '+author);
+              comment.author_name=author;
+            }
+          }
         // GET ALL OTHER COMMENT FIELDS FROM THE COMMENT EVENT    
         } else {
           if (body.audits[i].events[j].type == "Comment" && body.audits[i].events[j].public==true && i != 0) {
@@ -599,10 +601,10 @@ var ticketData = function(id,res, orgId,showModal, result) {
             comment.created_test = comment_date;
             comment.created_at = moment(comment.created_test).format("dddd, MMMM Do YYYY, h:mm:ss a")
             comment.comment = body.audits[i].events[j].html_body;
-           // comment.author_name = author; 
+            comment.author_name = author;
             if (body.audits[i].events[j].attachments.length != 0) {
               for (var k=0;k<body.audits[i].events[j].attachments.length; k++) {
-                console.log("URL: "+body.audits[i].events[j].attachments[k].content_url+" FILENAME: "+body.audits[i].events[j].attachments[k].file_name);
+                //console.log("URL: "+body.audits[i].events[j].attachments[k].content_url+" FILENAME: "+body.audits[i].events[j].attachments[k].file_name);
                 attachment = {};
                 attachment.url = body.audits[i].events[j].attachments[k].content_url;
                 attachment.filename = body.audits[i].events[j].attachments[k].file_name;
@@ -640,9 +642,7 @@ var ticketData = function(id,res, orgId,showModal, result) {
         }
       }
     }
-      
-  
-   // console.log("ALL COMMENT: "+JSON.stringify(comments,null,2,true));
+    // console.log("ALL COMMENT: "+JSON.stringify(comments,null,2,true));
     res.render("ticket",{result: result, orgId:orgId, showModal:showModal,comments:comments, state:state, description:description,dcreate_date:dcreate_date,id:id,ticket:id,subject:subject,priority:priority,type:type, newAttachments:newAttachments});
 	});
 };
