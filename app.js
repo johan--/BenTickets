@@ -354,7 +354,6 @@ var zendeskCB = function(err,res, req, tokens,id,comment,user){
     "ticket": {
    //  "submitter_id":user,
       "requester_id": user,
-   //   "author_id" : user,
       "comment": { 
         "public":"true",
         "body":comment,
@@ -547,17 +546,16 @@ var ticketData = function(id,res, orgId,showModal, result) {
   var author='';
 
 	zd.getAudit(id, function(body){
-    var rule = 'F';
-		var comments = [];
+    var comments = [];
     var newAttachments = [];
 		var user = zd.getTicketAuthor(id);
     for (var i = 0; i < body.count; i++) {
-      //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
+      // console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
      // INITIALIZED THE COMMENTS OBJECT BEFORE POPULATING
       comment = {};
       comment.attachments = [];
       for (var j = 0; j < body.audits[i].events.length; j++) {
-        //console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
+        // console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
         // THE FIRST RECORD IN THE EVENTS AUDIT IS ALWAYS HANDLED AS ORIGINAL TICKET
         if (i == 0 && j== 0) {
           var description = body.audits[i].events[0].html_body;
