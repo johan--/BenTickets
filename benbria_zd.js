@@ -209,6 +209,7 @@ exports.getUser = function(id){
     var result = '';
     for(var i=0; i< zd.user.length; i++) {
       if (zd.user[i].id == id) {
+      //console.log('USER: '+JSON.stringify(zd.user[i],null,2,true));
         result = zd.user[i].details;
       }
     }
@@ -216,7 +217,32 @@ exports.getUser = function(id){
   return result;
 } 
 
-  
+exports.getUserOrg = function(id){
+  if (id && zd.user){
+    var result = '';
+    for(var i=0; i< zd.user.length; i++) {
+      if (zd.user[i].id == id) {
+        //console.log('USER: '+JSON.stringify(zd.user[i],null,2,true));
+        result = zd.user[i].organization_id;
+      }
+    }
+  } 
+  return result;
+} 
+
+exports.getUserEmail = function(id){
+  if (id && zd.user){
+    var result = '';
+    for(var i=0; i< zd.user.length; i++) {
+      if (zd.user[i].id == id) {
+        //console.log('USER: '+JSON.stringify(zd.user[i],null,2,true));
+        result = zd.user[i].email;
+      }
+    }
+  } 
+  return result;
+} 
+
 exports.getFields = function(id){
   if (id && zd.body) {
     var result = [];

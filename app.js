@@ -113,7 +113,7 @@ app.get('/topicAdd',function(req,res){
 });
 
 app.get('/ticket',function(req,res){
-	ticketData(req.query.id,res,req.session.organization, false, 0);
+  ticketData(req.query.id,res,req.session.organization, false, 0,req);
 });
 
 app.get('/topic',function(req,res){
@@ -374,6 +374,7 @@ var zendeskCB = function(err,res, req, tokens,id,comment,user){
 }
 
 app.post('/ticketUpdate', function(req, res) {
+  console.log('the ORG: '+req.session.organization);
   var orgId = req.session.organization;
   var id = req.body.id;
   var comment = req.body.comment;
@@ -539,7 +540,7 @@ var ticketNew = function(orgId,res,showModal, result) {
   res.render("create",{result: result, organization: orgId, showModal:showModal});
 }
 
-var ticketData = function(id,res, orgId,showModal, result) {
+var ticketData = function(id, res, orgId,showModal, result,req) {
   console.log("request for handler 'TicketData' was called.");
 	console.log("ticket Data arg: (id):" + id);
   console.log("Organization Id: "+ orgId);
@@ -550,7 +551,7 @@ var ticketData = function(id,res, orgId,showModal, result) {
     var newAttachments = [];
 		var user = zd.getTicketAuthor(id);
     for (var i = 0; i < body.count; i++) {
-      // console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
+     //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
      // INITIALIZED THE COMMENTS OBJECT BEFORE POPULATING
       comment = {};
       comment.attachments = [];
@@ -558,6 +559,7 @@ var ticketData = function(id,res, orgId,showModal, result) {
         // console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
         // THE FIRST RECORD IN THE EVENTS AUDIT IS ALWAYS HANDLED AS ORIGINAL TICKET
         if (i == 0 && j== 0) {
+         // console.log("FIRST EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
           var description = body.audits[i].events[0].html_body;
           var dcreate_test = new Date(body.audits[i].created_at);
           var dcreate_date = moment(dcreate_test).format("dddd, MMMM Do YYYY, h:mm:ss a")
@@ -582,6 +584,12 @@ var ticketData = function(id,res, orgId,showModal, result) {
               console.log("RECIPIENT API: "+body.audits[i].events[j].recipients[0]);
               var author = zd.getUser(body.audits[i].events[j].recipients[0]);
               comment.author_name=author;
+              if (!orgId) {
+                orgId = zd.getUserOrg(body.audits[i].events[j].recipients[0]);
+                console.log('THE ORGINIZATION: '+orgId);
+                req.session.organization = orgId;
+                req.session.user = zd.getUserEmail(body.audits[i].events[j].recipients[0]);
+              } 
             }
           } else {
             // IF NOTIFICATION CAME FROM EMAIL RESPONSE GET THE AUTHOR ID
