@@ -15,6 +15,7 @@
     "nodemon": "*",
     "moment":"*",
     "node-zendesk": "*",
-    "nodemailer":"*"
+    "nodemailer":"*",
+    "password-generator":"*"
   }
 }

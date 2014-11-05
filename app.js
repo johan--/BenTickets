@@ -238,10 +238,11 @@ app.post('/changePass', function(req, res) {
   var username = req.session.user;
   var record = wf_db[username];
   var orgs = JSON.stringify(record.orgs);
+  var forum = record.forum;
 
   if ( passCurr == record.password) {
     if (passFirst == passSecond) {
-      wf_db[username]={"password":passFirst,"orgs":JSON.parse(orgs)}
+      wf_db[username]={"password":passFirst,"orgs":JSON.parse(orgs), "forum":forum}
       status = 200;
       res.render("changePass", {showModal: 'true', username: username, status: status, orgId:req.session.organization});
     } else {
@@ -294,7 +295,8 @@ var zendeskNewCB = function(err,res, req, tokens,orgId,subject,comment,userId){
       }
     }
   }
-  console.log('ORG: '+orgId+' SUB: '+subject+' COMMENT: '+comment+' USER: '+userId);
+  console.log('ORG: '+orgId);
+  console.log(' SUB: '+subject+' COMMENT: '+comment+' USER: '+userId);
   console.log(JSON.stringify(tokens));
   zd.createTicket(ticketJson,function(result) {
     console.log("results: " + result);
@@ -584,11 +586,15 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
               console.log("RECIPIENT API: "+body.audits[i].events[j].recipients[0]);
               var author = zd.getUser(body.audits[i].events[j].recipients[0]);
               comment.author_name=author;
+              // IF CUSTOMER LINKED TO TICKET FROM THEIR EMAIL, POPULATE SESSION FIELDS
               if (!orgId) {
                 orgId = zd.getUserOrg(body.audits[i].events[j].recipients[0]);
                 console.log('THE ORGINIZATION: '+orgId);
                 req.session.organization = orgId;
                 req.session.user = zd.getUserEmail(body.audits[i].events[j].recipients[0]);
+                var record = wf_db[req.session.user];
+                req.session.forum = record.forum;
+                req.session.orgs=record.orgs;
               } 
             }
           } else {
