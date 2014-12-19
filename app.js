@@ -22,7 +22,7 @@ var smtpTransport = nodemailer.createTransport("SMTP",{
     }
 });
 
-console.log("Zd :"+zd);
+console.log("Zd :"+JSON.stringify(zd,null,2,true));
 app.use(express.cookieParser('1234567890QWERTY'));
 app.use(express.session())
 //app.use(express.session({secret: '1234567890QWERTY'}));
@@ -92,13 +92,27 @@ app.get('/register', function(req, res) {
 app.get('/organization', function(req,res){
   console.log("ORG: "+req.session.organization);
   req.session.organization=req.query.id;
+  page = req.query.page;
+  if (req.query.search) {
+    search = req.query.search;
+  } else {
+    search = null;
+  }
+  console.log('WHAT PAGE AM I ON? '+page);
   for (var i in req.session.orgs) {
       if (req.session.orgs[i] == req.session.organization)
           req.session.orgname=i;
   }
   console.log ('ORGNAME: '+req.session.orgname);
-	res.render("organization",{gd:graphData(req.query.id, null), organization:req.session.organization, orgname:req.session.orgname});
-  
+	
+  var done = function(gd, pageNum) {
+   // page = zd.getPage();
+   if (!pageNum)
+      pageNum = zd.getPageNum();
+    console.log("THE PAGE NUMBER IS: "+page);
+    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, page:parseInt(page), pageNum:pageNum, search:search});    
+  }
+  graphData(req.query.id, search, page, done); 
 });
 
 app.get('/create',function(req,res){
@@ -204,7 +218,13 @@ app.post('/userCheck', function(req, res) {
         req.session.organization = value;
         req.session.orgname = Object.keys(record.orgs)[0];
         console.log(req.session.orgname)
-        res.render("organization",{gd:graphData(req.session.organization,null), orgname:req.session.orgname});
+        var done = function(gd) {
+          pageNum = zd.getPageNum();
+          orgRec = zd.getRec();
+          console.log("THE TOTAL NUMBER OF ORG RECRODS ARE: "+orgRec+" THE TOTAL PAGE NUMBERS IS: "+pageNum);
+          res.render("organization",{gd: gd, organization:value, orgname:req.session.orgname, page:1, pageNum:pageNum});    
+        }
+        graphData(req.session.organization, null, 0, done);
       } else {
         return res.render("select",{organizations:record.orgs, username:username, res:res, showModal:'false'});
       }
@@ -214,11 +234,24 @@ app.post('/userCheck', function(req, res) {
 });
 
 app.post('/searchRequest', function(req, res){
-  console.log("request for Search was called: "+req.body.search);
-  var done = function(gd) {
-    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname});    
+  if (req.body.search) {
+    search = req.body.search
+  } else {
+    console.log('SEARCH GOT HERE!');
+    search = req.query.search
   }
-  graphData(req.session.organization, req.body.search, done);
+  console.log("request for Search was called: "+req.body.search);
+  if (req.query.page) {
+    page = req.query.page
+  } else {
+    page = 0;
+  }
+  var done = function(gd, pageNum) {
+    if (!pageNum)
+      pageNum = zd.getPageNum();
+    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search, page:1, pageNum:pageNum});    
+  }
+  graphData(req.session.organization, search, page, done);
 });
 
 app.post('/searchForum', function(req, res){
@@ -706,8 +739,9 @@ var topicData = function(id, forum, res, showModal, result, orgId) {
   }
 };
 
-var graphData = function(id, search, done) {
+var graphData = function(id, search, page, done) {
   console.log("request for handler 'TICKET CHART' was called.");
+  var fields=[];
   var graphData = {};
   graphData.cols = [];
   graphData.rows = [];
@@ -723,22 +757,26 @@ var graphData = function(id, search, done) {
   console.log(id);
   var j = 0;
   if (search == null) {
-    var body = zd.getBody(id); 
-    var organization = zd.getOrganization(id);
+   // var body = zd.getBody(id); 
+    var orgName = zd.getOrganizationName(id);
+    var body = zd.getTicketBody(orgName, page);
     if (body.length == 0) {
       return false;
     } else {
-      for (var i = body.length -1; i >= 0; i--) {
-       var fields = zd.getFields(body[i].id);
-       var request_test = new Date(body[i].created_at); 
-       var request_date = moment(request_test).format("MMMM Do YYYY");
-       var update_test = new Date(body[i].updated_at)
-       var update_date = moment(update_test).format("MMMM Do YYYY");
-       graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":fields[2],"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
-        j++;
-      } 
-      return (graphData);
-    }  
+     // for (var i = body.length -1; i >= 0; i--) {
+      for (var i=0;i<body.length; i++) {
+        if (body[i].status != 'Deleted') {
+          field = body[i].field_22799616;
+          var request_test = new Date(body[i].created_at); 
+          var request_date = moment(request_test).format("MMMM Do YYYY");
+          var update_test = new Date(body[i].updated_at)
+          var update_date = moment(update_test).format("MMMM Do YYYY");
+          graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].ticket_type,"f":null},{"v":orgName,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+          j++;
+        }
+      }
+      done(graphData, null);
+    }
   } else { 
     var string = search+' type:ticket organization:'+id;
     zd.getQuery(string, function(body) {
@@ -748,18 +786,33 @@ var graphData = function(id, search, done) {
       }
       if (body.length == 0) {
         console.log('NOTHING FOUND IN TICKET SEARCH');
-        done(false);
+        done(false, 1);
       } else {
-        for (var i = body.length -1; i >= 0; i--) {
-        //for (var i=0;i<body.length; i++) {
-          var fields = zd.getFields(body[i].id);
-          var request_date = new Date(body[i].created_at); 
-          var update_date = new Date(body[i].updated_at)
-          console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+fields[2]+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
-          graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":fields[2],"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
-          j++;
-        } 
-        done(graphData);
+        //for (var i = body.length -1; i >= 0; i--) {
+        var count = 0;
+        if (page == 0)
+          startPage = page * 15;
+        else
+          startPage = (page - 1) * 15;
+        finishPage = startPage + 15;
+        for (var i=0;i<body.length; i++) {
+          count++;
+          if (count > startPage && count <= finishPage) {
+            console.log("GOT HERE!"+body[i].id);
+            field = body[i].custom_fields[2].value;
+            var request_date = new Date(body[i].created_at); 
+            var update_date = new Date(body[i].updated_at)
+            console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+field+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
+            graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+            j++;
+          }
+        }
+        pageNum = Math.round(count / 15); 
+        if (count >=1 && pageNum == 0) {
+          pageNum = 1;
+        }
+        console.log("TOTAL PAGES IN GRAPHDATA: "+pageNum+" COUNT IN GRAPHDATA: "+count);
+        done(graphData, pageNum);
       } 
     });
   }

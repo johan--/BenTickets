@@ -1,5 +1,6 @@
 var zendesk = require('node-zendesk');
 var fs = require('fs');
+var https = require('https');
 
 var __zendesk_file = "zd.json";
 
@@ -10,7 +11,8 @@ var client = zendesk.createClient({
     remoteUri: 'https://COMPANY.zendesk.com/api/v2',
 });
 
-var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null};
+
+var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0, pageNum:0};
 
 client.organizations.list(function (err, statusList, body, responseList, resultList) {
   if (err) {
@@ -49,6 +51,18 @@ exports.getAudit = function(id, callback) {
      callback(body);
     });
 } 
+
+exports.getOrgTickets = function(id, callback) {
+  client.tickets.listByOrganization(id, function(err,statusList, body, responseList, resultList) {
+    if (err) {
+        console.log("Error on ORG TICKTETS?");
+        callback(null);
+        return;
+    } 
+ //   console.log('LENGTH: '+body.length)
+    callback(body);
+  });
+}
 
 exports.getOrgUser = function(id, callback) {
   client.users.listByOrganization(id, function (err, statusList, body, responseList, resultList) {
@@ -120,9 +134,21 @@ exports.attachment = function (file, fileToken, callback) {
 }
 
 var n = 1;
+var t = 0;
+var start= 0;
+var start_time = 0;
+var output = [];
+var hold = [];
+var index = {};
 
 var update = function(){
   console.log("..." + n++); 
+  fiveMinute = Math.round((new Date() - (5 * 60 * 1000)) / 1000);
+  console.log("START TIME: "+start_time+" FIVE MINUTE TIME: "+fiveMinute);
+  
+  if (start_time > fiveMinute)
+    start_time = fiveMinute;
+
   client.tickets.list(function (err, statusList, body, responseList, resultList) {
     if (err) {
       console.log(err);
@@ -133,6 +159,56 @@ var update = function(){
     zd.resultList = resultList;
     zd.lastUpdate = new Date();
   })
+  
+  var options = {
+    host: 'COMPANY.zendesk.com',  
+    port: 443,
+    path: '/api/v2/exports/tickets.json?start_time='+start_time,
+    method: 'GET',
+    auth: 'EMAIL:PASSWORD!'
+    };
+
+  var req = https.request(options, function(res) {
+  
+    res.on('data', function(d) {
+       output += d;
+    });
+    res.on('end', function() {
+      hold = JSON.parse(output);
+      output = [];
+      if (start == 0) {
+        zd.tickets = hold.results;
+        console.log('NUMBER OF RESULTS: '+hold.results.length);
+        for (var i=0; i<hold.results.length; i++) {
+          index[hold.results[i].id] = i 
+          t++;
+        }
+        start = 1
+      } else {
+        for (var i=0; i<hold.results.length; i++) {
+          if (hold.results[i].id in index) {
+            zd.tickets[index[hold.results[i].id]] = hold.results[i]
+            console.log ('THE NEW ID: '+hold.results[i].id);
+          } else {
+            zd.tickets = zd.tickets.concat(hold.results[i]);
+            index[hold.results[i].id] = t;
+            t++;
+          }
+        }
+      }
+      console.log('END TIME: '+hold.end_time);
+      start_time = hold.end_time;
+    });
+  });
+     
+  req.end();
+   
+  req.on('error', function(e) {
+    console.error('THE ERROR'+e);
+  });
+
+
+
   client.topics.list(function (err, statusList, body, responseList, resultList) {
     if (err) {
       return;
@@ -204,6 +280,16 @@ exports.getOrganization = function(id){
   return result;
 }
 
+exports.getOrganizationName = function(id){
+  if (id && zd.organization){
+    var result = [];
+    for(var i=0; i< zd.organization.length; i++)
+      if (zd.organization[i].id == id)
+        result.push(zd.organization[i].name);
+    } 
+  return result;
+}
+
 exports.getUser = function(id){
   if (id && zd.user){
     var result = '';
@@ -245,12 +331,15 @@ exports.getUserEmail = function(id){
 
 exports.getFields = function(id){
   if (id && zd.body) {
+    console.log ('LENGTH: '+zd.body.length);
     var result = [];
     for (var i=0; i<zd.body.length; i++) {
       if (zd.body[i].id == id) {
+        //console.log("THE ID OF SEARCH: "+id);
         for (var j=0; j<3; j++){
           result.push(zd.body[i].fields[j].value);
         }
+        //console.log(JSON.stringify(result,null,2,true));
         return result;
       }
     }
@@ -263,6 +352,40 @@ exports.getBody = function(organization){
     for(var i=0; i< zd.body.length; i++)
       if (zd.body[i].organization_id == organization)
         result.push(zd.body[i]);
+    return result;
+  } else return [];
+};
+
+exports.getTicketBody = function(orgName, page){
+  if (orgName && zd.tickets) {
+    console.log('ORG NAME: '+orgName);
+    var result = [];
+    zd.count = 0;
+    if (page == 0)
+      startPage = page * 15;
+    else
+      startPage = (page - 1) * 15;
+    finishPage = startPage + 15;
+    console.log ("START: "+startPage+" FINISH: "+finishPage);
+    for(var i=zd.tickets.length-1; i >= 0; i--) {
+      // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
+      if (zd.tickets[i].organization_name == orgName  && zd.tickets[i].status != 'Deleted') {
+        zd.count++;
+        if (zd.count > startPage && zd.count <= finishPage) {
+          console.log('COUNTER: '+zd.count+' THE TICKET ID: '+zd.tickets[i].id);
+          result.push(zd.tickets[i]);
+        }
+      }
+    }
+    pageCalc = (zd.count / 15);
+    pageTest = Math.round(zd.count / 15);
+    if (pageCalc > pageTest) {
+      zd.pageNum = pageTest + 1;
+    } else {
+      zd.pageNum = pageTest;
+    }
+    zd.page = page;
+    console.log ('THE PAGE NUMBER: '+zd.pageNum);
     return result;
   } else return [];
 };
@@ -301,11 +424,13 @@ exports.getTicketAuthor = function(id){
   return "unknown";
 }
 
-
+exports.getPageNum = function(){return zd.pageNum};
+exports.getPage = function(){return zd.page}; 
 exports.getResponse = function(){return zd.responseList};
 exports.getResult = function(){return zd.resultList};
 exports.getStatus = function(){return zd.statusList};
 exports.getUpdate = function(){return zd.lastUpdate};
+exports.getRec = function(){return zd.count};
 exports.getCount = function(){
   if (zd.body){
     return zd.body.length;

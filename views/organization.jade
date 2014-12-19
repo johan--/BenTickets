@@ -10,7 +10,7 @@ block content
   script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
   meta(name='description', content='Benbria Support Tickets')
   script.
-       
+    
     // Load the Visualization API and the piechart package.
     google.load('visualization', '1', {'packages':['table']});
       
@@ -69,7 +69,7 @@ block content
               li.active
                 a(href="#") View Tickets
               li
-                a(href="create") Create New Ticket
+                a(href="create") Create a New Ticket
           li.dropdown
             a(href="#" lass="dropdown-toggle" data-toggle="dropdown") Settings
               b.caret
@@ -87,9 +87,61 @@ block content
     form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
       div(align="right")
         .form-group
-          input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets")
+          input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets" value=search) 
         button.btn.btn-primary Search
     div#chart_div
+    center
+      nav
+        - if (page != 1 || page < pageNum) {
+          - console.log('PAGE: '+page+' TOTAL: '+pageNum);
+          ul.pagination
+            - if (page == 1) {
+            li.disabled 
+              a(href="#")
+                span(aria-hidden="true") &laquo;
+                span.sr-only Previous
+            - } else {
+            li
+              a#previous(href="organization?id="+organization)
+                span(aria-hidden="true") &laquo;
+                span.sr-only Previous
+            - }
+            li.active
+              a(href="#")
+                div(id='page') 
+                span.sr-only (current)
+            - if ((page + 1) <= pageNum) {
+              li
+                a#page2(href="organization?id="+organization) 
+                  div(id='page2')
+            -}
+            - if ((page + 2) <= pageNum) {
+              li
+                a#page3(href="organization?id="+organization)
+                  div(id='page3')
+            -}
+            - if ((page + 3) <= pageNum) {
+              li
+                a#page4(href="organization?id="+organization)
+                  div(id='page4')
+            -}
+            - if ((page + 4) <= pageNum) {
+              li
+                a#page5(href="organization?id="+organization)
+                  div(id='page5')
+            -}
+            - if (page == pageNum) {
+            li.disabled 
+              a(href="#")
+                span(aria-hidden="true") &raquo;
+                span.sr-only Next
+            - } else {
+              li
+                a#next(href="organization?id="+organization)
+                  span(aria-hidden="true") &raquo;
+                  span.sr-only Next
+            -}
+        -}
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 
@@ -105,4 +157,67 @@ block content
               a#email(href='mailto:support@benbria.com?Subject=Benbria Support') support@benbria.com
           .modal-footer
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
+    
+    script.
+      var previous = 1;
+      var page = parseInt("#{page}");
+      var pageNum = parseInt("#{pageNum}");
+      var organization = ("#{organization}");
+      var search = ("#{search}");
+      console.log('WHAT PAGE IS SENT: '+page+' NUMBER OF PAGES: '+pageNum);
+      
+      if (page != 0) {
+        previous= page -1;
+        if (search) {
+          $('#previous').attr('href', $('#previous').attr('href') + '&page=' + previous + '&search='+ search);
+        } else {
+          $('#previous').attr('href', $('#previous').attr('href') + '&page=' + previous);
+        }
+      }
+      if (page <= pageNum) {
+        page2 = page + 1;
+        $('#page2').html(page2);
+        if (search) {
+          $('#page2').attr('href', $('#page2').attr('href') + '&page=' + page2 + '&search='+ search);
+          $('#next').attr('href', $('#next').attr('href') + '&page=' + page2 + '&search='+ search);
+        } else { 
+          $('#page2').attr('href', $('#page2').attr('href') + '&page=' + page2);
+          $('#next').attr('href', $('#next').attr('href') + '&page=' + page2);
+        }         
+        if (page2 < pageNum) {
+          page3 = page2 +1;
+          $('#page3').html(page3);
+          if (search) {
+            $('#page3').attr('href', $('#page3').attr('href') + '&page=' + page3+ '&search='+ search);
+          } else {
+            $('#page3').attr('href', $('#page3').attr('href') + '&page=' + page3);
+          }
+          if (page3 < pageNum) {
+            page4 = page3 + 1;
+            $('#page4').html(page4);
+            if (search) {
+              $('#page4').attr('href', $('#page4').attr('href') + '&page=' + page4+ '&search='+ search);
+            } else {
+              $('#page4').attr('href', $('#page4').attr('href') + '&page=' + page4);
+            }
+            console.log("PAGE 4: "+page4+" AND THE TOTAL AGAIN! "+pageNum);
+            if (page4 <= pageNum) {
+              page5 = page4+1;
+              $('#page5').html(page5);
+              if (search) {
+                $('#page5').attr('href', $('#page5').attr('href') + '&page=' + page5+ '&search='+ search);
+              } else {
+                $('#page5').attr('href', $('#page5').attr('href') + '&page=' + page5);
+              }
+            }
+          }
+        }
+      }
+      $('#page').html(page);
+
+      
+
+      
+    
+      
 

@@ -42,9 +42,9 @@ block content
             ul.dropdown-menu
               if (orgId)
                 li
-                  a(href="organization?id="+orgId) Select a Ticket
+                  a(href="organization?id="+orgId+"&page="+1) Select a Ticket
                 li
-                  a(href="create") Add New Ticket
+                  a(href="create") Create a New Ticket
               li.active
                 a(href="select") Select Organization
           li.dropdown
@@ -64,6 +64,7 @@ block content
           fieldset
             legend Select your Organization
             label Location &nbsp&nbsp
+            input(id="page", value="1", name="page", type="hidden")
             select(id="myList",name="id",onChange="SETcookie()")
               - for (var x in organizations)
                 option(value="#{organizations[x]}") #{x}
