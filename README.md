@@ -46,9 +46,6 @@ UPDATE: Email settings in apps.js to point to your email account (default for gm
 
 UPDATE: 'To:' for the post to registerUser search for - <pre> to: "name@name.com", </pre>
 
-UPDATE : app.js look for all instances of ADD TOKEN HERE and update with your token
-
-
 Update email triggers for customer notification links (Email/Twitter) to point to your site
 
 
