@@ -37,7 +37,9 @@ exports.getAudit = function(id, callback) {
         console.log("Error audit id?");
         return;
       } 
-      callback(body);
+     // console.log('BODY: '+JSON.stringify(body,null,2,true));
+     // console.log('RESULT: '+JSON.stringify(resultList,null,2,true));
+     callback(resultList);
     });
 }
 
@@ -165,7 +167,7 @@ var update = function(){
     port: 443,
     path: '/api/v2/exports/tickets.json?start_time='+start_time,
     method: 'GET',
-    auth: 'EMAIL:PASSWORD!'
+    auth: 'EMAIL:PASSWORD'
     };
 
   var req = https.request(options, function(res) {
