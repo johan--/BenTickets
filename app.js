@@ -349,6 +349,7 @@ app.post('/ticketCreate', function(req, res) {
         userId = body[i].id;
       }
     }
+    
     var data = [];
     for (var i = 0; i <req.files.data.length; i++)
       data.push(req.files.data[i]);
