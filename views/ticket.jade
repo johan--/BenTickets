@@ -176,10 +176,14 @@ block content
             p 
               center 
                 h4 Ticket was successfully updated
-          - if (result !=200)
+          - if (result ==422)
             p 
               center 
-                h4 Error updating. Please contact the administrator
+                h4 ERROR: COMMENT field is required to update a ticket
+          - if (result ==522)
+            p 
+              center 
+                h4 ERROR: FILE UPLOAD FAILED: problem encountered by server please try again
           .modal-footer
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
     #retModal(data-toggle="modal" href="#ticketModal")

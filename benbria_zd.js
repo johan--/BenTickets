@@ -1,6 +1,7 @@
 var zendesk = require('node-zendesk');
 var fs = require('fs');
 var https = require('https');
+var http = require('http');
 
 var __zendesk_file = "zd.json";
 
@@ -9,6 +10,7 @@ var client = zendesk.createClient({
     username: 'PUT YOUR USERNAME/EMAIL',
     token: 'PUT YOUR TOKEN HERE',
     remoteUri: 'https://COMPANY.zendesk.com/api/v2',
+    //remoteUri: 'http://localhost:8080/api/v2'
 });
 
 
@@ -129,7 +131,8 @@ exports.createTicket = function (ticketData, callback) {
 exports.attachment = function (file, fileToken, callback) {
   client.attachments.upload(file,fileToken, function (err,statusList, body, responseList, resultList) {
     if (err) {
-      console.log("ERROR: "+err);
+      console.log("ERROR: "+JSON.stringify(err,null,2,true));
+      callback(err);
     }
     callback(body);  
   });
@@ -151,65 +154,35 @@ var update = function(){
   if (start_time > fiveMinute)
     start_time = fiveMinute;
 
-  client.tickets.list(function (err, statusList, body, responseList, resultList) {
+  client.tickets.export(start_time, function(err, statusList, body, responseList, resultList) {
     if (err) {
-      console.log(err);
       return;
     }
-    zd.body = body;
-    zd.responseList = responseList;
-    zd.resultList = resultList;
-    zd.lastUpdate = new Date();
-  })
-  
-  var options = {
-    host: 'COMPANY.zendesk.com',  
-    port: 443,
-    path: '/api/v2/exports/tickets.json?start_time='+start_time,
-    method: 'GET',
-    auth: 'EMAIL:PASSWORD'
-    };
-
-  var req = https.request(options, function(res) {
-  
-    res.on('data', function(d) {
-       output += d;
-    });
-    res.on('end', function() {
-      hold = JSON.parse(output);
-      output = [];
-      if (start == 0) {
-        zd.tickets = hold.results;
-        console.log('NUMBER OF RESULTS: '+hold.results.length);
-        for (var i=0; i<hold.results.length; i++) {
-          index[hold.results[i].id] = i 
+    //console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
+    output = [];
+    if (start == 0) {
+      zd.tickets = body.results;
+      console.log('NUMBER OF RESULTS: '+body.results.length);
+      for (var i=0; i<body.results.length; i++) {
+        index[body.results[i].id] = i 
+        t++;
+      }
+      start = 1
+    } else {
+      for (var i=0; i<body.results.length; i++) {
+        if (body.results[i].id in index) {
+          zd.tickets[index[body.results[i].id]] = body.results[i]
+          console.log ('THE NEW ID: '+body.results[i].id);
+        } else {
+          zd.tickets = zd.tickets.concat(body.results[i]);
+          index[body.results[i].id] = t;
           t++;
         }
-        start = 1
-      } else {
-        for (var i=0; i<hold.results.length; i++) {
-          if (hold.results[i].id in index) {
-            zd.tickets[index[hold.results[i].id]] = hold.results[i]
-            console.log ('THE NEW ID: '+hold.results[i].id);
-          } else {
-            zd.tickets = zd.tickets.concat(hold.results[i]);
-            index[hold.results[i].id] = t;
-            t++;
-          }
-        }
       }
-      console.log('END TIME: '+hold.end_time);
-      start_time = hold.end_time;
-    });
-  });
-     
-  req.end();
-   
-  req.on('error', function(e) {
-    console.error('THE ERROR'+e);
-  });
-
-
+    }
+    console.log('END TIME: '+body.end_time);
+    start_time = body.end_time;
+  })
 
   client.topics.list(function (err, statusList, body, responseList, resultList) {
     if (err) {
@@ -331,7 +304,7 @@ exports.getUserEmail = function(id){
   return result;
 } 
 
-exports.getFields = function(id){
+/*exports.getFields = function(id){
   if (id && zd.body) {
     console.log ('LENGTH: '+zd.body.length);
     var result = [];
@@ -346,7 +319,7 @@ exports.getFields = function(id){
       }
     }
   } else return zd.body;
-}
+} 
 
 exports.getBody = function(organization){
   if (organization && zd.body) {
@@ -356,7 +329,7 @@ exports.getBody = function(organization){
         result.push(zd.body[i]);
     return result;
   } else return [];
-};
+}; */
 
 exports.getTicketBody = function(orgName, page){
   if (orgName && zd.tickets) {
@@ -428,10 +401,10 @@ exports.getTicketAuthor = function(id){
 
 exports.getPageNum = function(){return zd.pageNum};
 exports.getPage = function(){return zd.page}; 
-exports.getResponse = function(){return zd.responseList};
-exports.getResult = function(){return zd.resultList};
-exports.getStatus = function(){return zd.statusList};
-exports.getUpdate = function(){return zd.lastUpdate};
+//exports.getResponse = function(){return zd.responseList};
+//exports.getResult = function(){return zd.resultList};
+//exports.getStatus = function(){return zd.statusList};
+//exports.getUpdate = function(){return zd.lastUpdate};
 exports.getRec = function(){return zd.count};
 exports.getCount = function(){
   if (zd.body){

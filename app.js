@@ -369,9 +369,14 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
       filename: url
     }
     zd.attachment(filePass,fileName, function (result) {
-      console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
-      tokens.push(result.upload.token);
-      processReq(res, req,tokens,id,comment,user,data,cb);
+      console.log("ATTACHMENT RESULT UPDATE: "+JSON.stringify(result,null,2,true));
+      if (result.code == 'HPE_INVALID_CONSTANT') {
+        var result = 522;
+        done(id, res, result);
+      } else {
+        tokens.push(result.upload.token);
+        processReq(res, req,tokens,id,comment,user,data,cb);
+      }
     });
   } else 
     processReq(res, req,tokens,id,comment,user,data,cb);
@@ -397,6 +402,7 @@ var zendeskCB = function(err,res, req, tokens,id,comment,user){
       ticketData(id,res,req.session.organization, true, result); 
     });
   } else {
+
     result = 422;
     ticketData(id,res,req.session.organization, true, result);
   }
@@ -409,6 +415,7 @@ app.post('/ticketUpdate', function(req, res) {
   var comment = req.body.comment;
   body = zd.getOrgUser(orgId, function(body) {
    for (var i = 0; i<body.length; i++) {
+      
       if (body[i].email == req.session.user) {
         userId = body[i].id;
       }
@@ -416,6 +423,9 @@ app.post('/ticketUpdate', function(req, res) {
     var data = [];
     for (var i = 0; i <req.files.data.length; i++)
       data.push(req.files.data[i]);
+    var done = function(id, res, result) {
+      ticketData(id, res, req.session.organization, true, result);
+    }
     processReq(res,req,[],id,comment,userId,data,zendeskCB);
   });
 });
@@ -570,7 +580,7 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
   var author='';
 
   zd.getAudit(id, function(body){
-    //console.log('GOT HERE!!!!\n'+JSON.stringify(body,null,2,true)+ "\nTHE COUNT: "+body[0].count+' '+body[0].next_page);
+    // console.log('GOT HERE!!!!\n'+JSON.stringify(body,null,2,true)+ "\nTHE COUNT: "+body[0].count+' '+body[0].next_page);
     var comments = [];
     var newAttachments = [];
     var user = zd.getTicketAuthor(id);
