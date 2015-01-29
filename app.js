@@ -610,8 +610,19 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
         // THE NOTIFICATION EVENT WITH BODY HAVING 'YOUR REQUEST' CONTAINS THE AUTHOR ID OF THE COMMENT
         if (body[0].audits[i].events[j].type == "Notification") {
           if (body[0].audits[i].events[j].body.match(/Your request/g)) {
+            // IF CUSTOMER LINKED TO TICKET FROM THEIR EMAIL, POPULATE SESSION FIELDS
+            if (!orgId) {
+              orgId = zd.getUserOrg(body[0].audits[i].events[j].recipients[0]);
+              console.log('THE ORGINIZATION: '+orgId);
+              req.session.organization = orgId;
+              req.session.user = zd.getUserEmail(body[0].audits[i].events[j].recipients[0]);
+              var record = wf_db[req.session.user];
+              req.session.forum = record.forum;
+              req.session.orgs=record.orgs;
+            }
             // WEB CHANNEL REPRESENTS ENTRY FROM ZENDESK SO USE AUTHOR ID AS ALL COMMENTS ARE ENTERED AS ADMIN
             if (body[0].audits[i].via.channel == 'web') {
+            // console.log('WHAT WE GOT HERE IN WEB TICKET? '+JSON.stringify(body[0].audits[i].events[j],null,2,true));
               var author = zd.getUser(body[0].audits[i].author_id);
               comment.author_name=author;
             // TICKETS FROM tickets.benbria.com ARE FROM THE API CHANNEL GET FIRST ELEMENT FROM RECIPIENT ARRAY
@@ -620,15 +631,7 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
               var author = zd.getUser(body[0].audits[i].events[j].recipients[0]);
               comment.author_name=author;
               // IF CUSTOMER LINKED TO TICKET FROM THEIR EMAIL, POPULATE SESSION FIELDS
-              if (!orgId) {
-                orgId = zd.getUserOrg(body[0].audits[i].events[j].recipients[0]);
-                console.log('THE ORGINIZATION: '+orgId);
-                req.session.organization = orgId;
-                req.session.user = zd.getUserEmail(body[0].audits[i].events[j].recipients[0]);
-                var record = wf_db[req.session.user];
-                req.session.forum = record.forum;
-                req.session.orgs=record.orgs;
-              }
+              
             }
           } else {
             // IF NOTIFICATION CAME FROM EMAIL RESPONSE GET THE AUTHOR ID
