@@ -2,14 +2,15 @@ var zendesk = require('node-zendesk');
 var fs = require('fs');
 var https = require('https');
 var http = require('http');
+var config = require('./config');
 
 var __zendesk_file = "zd.json";
 
 var interval =  60 * 50 * 50; // secs
 var client = zendesk.createClient({
-    username: 'PUT YOUR USERNAME/EMAIL',
-    token: 'PUT YOUR TOKEN HERE',
-    remoteUri: 'https://COMPANY.zendesk.com/api/v2',
+    username: config.username,
+    token: config.token,
+    remoteUri: config.remoteUri
     //remoteUri: 'http://localhost:8080/api/v2'
 });
 
