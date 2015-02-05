@@ -3,7 +3,7 @@ BenTickets
 
 <strong>Framework for creating your own Ticketing site with Forums via the $20/year Zendesk account via API</strong>
 
-node with Jade and Express using node-zendesk for almost all the zendesk api calls except attachments (blakmatrix code doesn't work)
+node with Jade and Express using node-zendesk 
 SEE: https://github.com/drobern/node-zendesk
 
 run npm install to add all dependencies
@@ -19,19 +19,7 @@ entry stored in db.json<br><strong>NO DB REQUIRED</strong></br>
 </ul>
 <strong> Multiple organizations works well for resellers who service multiple customers. </strong>
 
-User does not need to be created in in Zendesk only the Organization entry is required. 
-The ticket will be associated in application as the Details value under the Information section for your Zendesk Organization. 
-In the Identities section for you organization add the email addresses and or Twitter accounts for those who should recieve email notifications
-
-
-UPDATE : benbria_zd.js for username, token, remoteUri
-<pre>
-    var client = zendesk.createClient({
-        username: 'PUT YOUR USERNAME/EMAIL',
-        token: 'PUT YOUR TOKEN HERE',
-        remoteUri: 'https://COMPANY.zendesk.com/api/v2',
-    });
-</pre>
+Create all your Organizations in Zendesk and then each time you add a new User in your App, add a new Person ensuring you use the same email address, noting that this is case sensitive. Associate you Zendesk entry to the Organization created. In the information box provide the Full name and any other information you would like to be displayed when a ticket comment is entered
 
 UPDATE: Email settings in apps.js to point to your email account (default for gmail)
 <pre>
@@ -42,6 +30,16 @@ UPDATE: Email settings in apps.js to point to your email account (default for gm
             pass: "xxxxx"
         }
    });
+</pre>
+
+UPDATE: Email welcome message and text for you email, website and company name
+<pre>
+    var mailOptions = {
+      from: "support@gmail.com",
+      to: username,
+      subject: "Your account had been created",
+      text: "Welcome to Benbria Online ticket at http://xxxx.xxxx.com.\nPlease note your \nUsername: "+username+"\nPassword: "+password+"\nThank you\n xxxxx Team" ,
+  }
 </pre>
 
 UPDATE: 'To:' for the post to registerUser search for - <pre> to: "name@name.com", </pre>

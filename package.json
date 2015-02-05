@@ -17,5 +17,5 @@
     "node-zendesk": "*",
     "nodemailer":"*",
     "password-generator":"*"
-  }
+   }
 }
