@@ -21,6 +21,18 @@ entry stored in db.json<br><strong>NO DB REQUIRED</strong></br>
 
 Create all your Organizations in Zendesk and then each time you add a new User in your App, add a new Person ensuring you use the same email address, noting that this is case sensitive. Associate you Zendesk entry to the Organization created. In the information box provide the Full name and any other information you would like to be displayed when a ticket comment is entered
 
+CREATE: A config.js file in your root folder with the following
+<pre>
+    var config = {};
+
+    config.username='EMAIL ADDRESS FOR ZENDESK';
+    config.token='TOKEN FOR YOU ZENDESK USER'
+    config.remoteUri='https://COMPANY.zendesk.com/api/v2';
+
+    module.exports = config;
+</pre>
+REPLACE: The UPPERCASE words with your values from Zendesk
+
 UPDATE: Email settings in apps.js to point to your email account (default for gmail)
 <pre>
     var smtpTransport = nodemailer.createTransport("SMTP",{
