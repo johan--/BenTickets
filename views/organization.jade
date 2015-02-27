@@ -5,9 +5,9 @@ block content
   script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
   script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
   link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
-  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
-  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
-  script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+  link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css")
+  script(src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
   meta(name='description', content='Benbria Support Tickets')
   script.
     
@@ -82,66 +82,66 @@ block content
                 a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
     .jumbotron
-        h1.titre Tickets for Organization: #{orgname} 
-
-    form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
-      div(align="right")
-        .form-group
-          input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets" value=search) 
-        button.btn.btn-primary Search
-    div#chart_div
-    center
-      nav
-        - if (page != 1 || page < pageNum) {
-          - console.log('PAGE: '+page+' TOTAL: '+pageNum);
-          ul.pagination
-            - if (page == 1) {
-            li.disabled 
-              a(href="#")
-                span(aria-hidden="true") &laquo;
-                span.sr-only Previous
-            - } else {
-            li
-              a#previous(href="organization?id="+organization)
-                span(aria-hidden="true") &laquo;
-                span.sr-only Previous
-            - }
-            li.active
-              a(href="#")
-                div(id='page') 
-                span.sr-only (current)
-            - if ((page + 1) <= pageNum) {
+      h1.titre Tickets for Organization: #{orgname} 
+    .container
+      form.form-inline(action="/searchRequest",method="post",enctype="multipart/form-data" role="form")
+        div(align="right")
+          .form-group
+            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets" value=search) 
+          button.btn.btn-primary Search
+      div#chart_div
+      center
+        nav
+          - if (page != 1 || page < pageNum) {
+            - console.log('PAGE: '+page+' TOTAL: '+pageNum);
+            ul.pagination
+              - if (page == 1) {
+              li.disabled 
+                a(href="#")
+                  span(aria-hidden="true") &laquo;
+                  span.sr-only Previous
+              - } else {
               li
-                a#page2(href="organization?id="+organization) 
-                  div(id='page2')
-            -}
-            - if ((page + 2) <= pageNum) {
-              li
-                a#page3(href="organization?id="+organization)
-                  div(id='page3')
-            -}
-            - if ((page + 3) <= pageNum) {
-              li
-                a#page4(href="organization?id="+organization)
-                  div(id='page4')
-            -}
-            - if ((page + 4) <= pageNum) {
-              li
-                a#page5(href="organization?id="+organization)
-                  div(id='page5')
-            -}
-            - if (page == pageNum) {
-            li.disabled 
-              a(href="#")
-                span(aria-hidden="true") &raquo;
-                span.sr-only Next
-            - } else {
-              li
-                a#next(href="organization?id="+organization)
+                a#previous(href="organization?id="+organization)
+                  span(aria-hidden="true") &laquo;
+                  span.sr-only Previous
+              - }
+              li.active
+                a(href="#")
+                  div(id='page') 
+                  span.sr-only (current)
+              - if ((page + 1) <= pageNum) {
+                li
+                  a#page2(href="organization?id="+organization) 
+                    div(id='page2')
+              -}
+              - if ((page + 2) <= pageNum) {
+                li
+                  a#page3(href="organization?id="+organization)
+                    div(id='page3')
+              -}
+              - if ((page + 3) <= pageNum) {
+                li
+                  a#page4(href="organization?id="+organization)
+                    div(id='page4')
+              -}
+              - if ((page + 4) <= pageNum) {
+                li
+                  a#page5(href="organization?id="+organization)
+                    div(id='page5')
+              -}
+              - if (page == pageNum) {
+              li.disabled 
+                a(href="#")
                   span(aria-hidden="true") &raquo;
                   span.sr-only Next
-            -}
-        -}
+              - } else {
+                li
+                  a#next(href="organization?id="+organization)
+                    span(aria-hidden="true") &raquo;
+                    span.sr-only Next
+              -}
+          -}
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 
