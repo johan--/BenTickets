@@ -11,9 +11,8 @@ var client = zendesk.createClient({
     username: config.username,
     token: config.token,
     remoteUri: config.remoteUri
-    //remoteUri: 'http://localhost:8080/api/v2'
+   //remoteUri: 'http://localhost:8080/api/v2'
 });
-
 
 var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0, pageNum:0};
 

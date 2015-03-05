@@ -299,14 +299,26 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
-    var fileName = {
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
+    });
+
+
+    /*var fileName = {
       filename: url
     }
     zd.attachment(filePass,fileName, function (result) {
       console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
       tokens.push(result.upload.token);
       processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
-    });   
+    });  */ 
   } else 
     processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
 }
@@ -366,19 +378,32 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
     var filePass = 'public/downloads/'+split[split.length - 1];
     console.log('THE FILE: '+ filePass);
     url = encodeURIComponent(f.name);
-    var fileName = {
+
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processReq(res, req,tokens,id,comment,user,data,cb);
+    });
+
+
+  /*  var fileName = {
       filename: url
     }
     zd.attachment(filePass,fileName, function (result) {
       console.log("ATTACHMENT RESULT UPDATE: "+JSON.stringify(result,null,2,true));
       if (result.code == 'HPE_INVALID_CONSTANT') {
         var result = 522;
-        done(id, res, result);
+        ticketData(id,res,req.session.organization, true, result);
       } else {
         tokens.push(result.upload.token);
         processReq(res, req,tokens,id,comment,user,data,cb);
       }
-    });
+    }); */
   } else 
     processReq(res, req,tokens,id,comment,user,data,cb);
 }
@@ -439,14 +464,26 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
-    var fileName = {
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processTop(res, req,tokens,subject,comment,data,cb);
+      });
+
+
+   /* var fileName = {
       filename: url
     }
     zd.attachment(filePass,fileName, function (result) {
       console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
       tokens.push(result.upload.token);
       processTop(res, req,tokens,subject,comment,data,cb);
-    });
+    }); */
   } else 
     processTop(res, req,tokens,subject,comment,data,cb);
 }
@@ -511,14 +548,25 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
     url = encodeURIComponent(f.name);
-    var fileName = {
+    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
+    console.log(cmd_line);
+    var execShell = require('child_process').exec;
+    execShell(cmd_line, function (error, stdout, stderr) {
+          if (error) return cb(error);
+          var body = JSON.parse(stdout);
+          if (body.error) return cb(stdout);
+          tokens.push(body.upload.token);
+          processComm(res, req,tokens,id,comment,data,cb);
+      });
+
+    /*var fileName = {
       filename: url
     }
     zd.attachment(filePass,fileName, function (result) {
       console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
       tokens.push(result.upload.token);
       processComm(res, req,tokens,id,comment,data,cb);
-    });
+    }); */
   } else 
     processComm(res, req,tokens,id,comment,data,cb);
 }
