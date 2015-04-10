@@ -1,13 +1,23 @@
 var express = require('express');
+var favicon = require('serve-favicon');
 var app = express();
 var querystring = require("querystring");
+var url = require("url");
+var http = require("http");
 
 var zd = require("./benbria_zd");
 var db = require('./db');
 var https = require('https');
 var fs = require('fs');
+var request = require('request');
 var moment = require('moment');
 var generatePassword = require('password-generator');
+var config = require('./config');
+
+var username=config.username;
+var token=config.token;
+var password = config.password;
+var remoteUrl=config.remoteUri;
 
 db.init('db.json'); 
 var wf_db = db.db
@@ -31,6 +41,9 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 app.use(express.bodyParser({ keepExtensions:true, uploadDir: __dirname + '/public/downloads' }));
+
+app.use(favicon(__dirname + '/public/img/favicon.ico'));
+
 //app.use(express.bodyParser());
 //app.use(express.methodOverride());
 app.use(app.router);
@@ -298,27 +311,31 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
   if (f.originalFilename){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
-    url = encodeURIComponent(f.name);
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
-    console.log(cmd_line);
-    var execShell = require('child_process').exec;
-    execShell(cmd_line, function (error, stdout, stderr) {
-          if (error) return cb(error);
-          var body = JSON.parse(stdout);
-          if (body.error) return cb(stdout);
-          tokens.push(body.upload.token);
-          processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
-    });
-
-
-    /*var fileName = {
-      filename: url
+    var urlname = encodeURIComponent(f.name);
+    var options = {
+      url: remoteUrl+'/uploads.json?filename='+urlname,
+      headers: {
+        'Content-Type': 'application/binary'
+      },
+      auth: {
+        username: username,
+        password: password
+      },
     }
-    zd.attachment(filePass,fileName, function (result) {
-      console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
-      tokens.push(result.upload.token);
-      processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
-    });  */ 
+    var readStream = fs.createReadStream(filePass);
+
+    readStream.pipe(
+      request.post(options, function(error, response, updata) {  
+        if (error) {
+            console.log(": Cannot upload file to due to " + error);
+        } else {
+            var body = JSON.parse(updata);
+            console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
+            tokens.push(body.upload.token);
+        }
+        processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
+      })
+    );
   } else 
     processNewReq(res, req,tokens,id,subject,comment,user,data,cb);
 }
@@ -356,9 +373,11 @@ app.post('/ticketCreate', function(req, res) {
    /* userId = body[0].id;
     console.log("THE USER DATA1: "+JSON.stringify(body[0],null,2,true)+" THE USER DATA2: "+JSON.stringify(body[1],null,2,true));
     console.log("THE USER NAME: "+req.session.user); */
+    console.log('ORGANIZATION USER RECORD: '+JSON.stringify(body,null,2,true));
     for (var i = 0; i<body.length; i++) {
       if (body[i].email == req.session.user) {
         userId = body[i].id;
+        console.log('THE USER: '+userId);
       }
     }
     
@@ -375,35 +394,39 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
   var f = data.shift();
   if (f.originalFilename){
     var split = f.path.split('/');
+    console.log('THE SPLIT: '+split);
     var filePass = 'public/downloads/'+split[split.length - 1];
+    console.log('FILEPASS: '+filePass);
     console.log('THE FILE: '+ filePass);
-    url = encodeURIComponent(f.name);
-
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
-    console.log(cmd_line);
-    var execShell = require('child_process').exec;
-    execShell(cmd_line, function (error, stdout, stderr) {
-          if (error) return cb(error);
-          var body = JSON.parse(stdout);
-          if (body.error) return cb(stdout);
-          tokens.push(body.upload.token);
-          processReq(res, req,tokens,id,comment,user,data,cb);
-    });
-
-
-  /*  var fileName = {
-      filename: url
+    var urlname = encodeURIComponent(f.name);
+    console.log('URL NAME: '+urlname);
+    // var stats = fs.statSync('kfc-red.png');
+    // console.log('SIZE: '+stats.size);
+    
+    var options = {
+      url: remoteUrl+'/uploads.json?filename='+urlname,
+      headers: {
+        'Content-Type': 'application/binary'
+      },
+      auth: {
+        username: username,
+        password: password
+      },
     }
-    zd.attachment(filePass,fileName, function (result) {
-      console.log("ATTACHMENT RESULT UPDATE: "+JSON.stringify(result,null,2,true));
-      if (result.code == 'HPE_INVALID_CONSTANT') {
-        var result = 522;
-        ticketData(id,res,req.session.organization, true, result);
-      } else {
-        tokens.push(result.upload.token);
+    var readStream = fs.createReadStream(filePass);
+
+    readStream.pipe(
+      request.post(options, function(error, res, updata) {  
+        if (error) {
+            console.log(": Cannot upload file to due to " + error);
+        } else {
+            var body = JSON.parse(updata);
+            console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
+            tokens.push(body.upload.token);
+        }
         processReq(res, req,tokens,id,comment,user,data,cb);
-      }
-    }); */
+      })
+    );
   } else 
     processReq(res, req,tokens,id,comment,user,data,cb);
 }
@@ -463,27 +486,31 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
   if (f.originalFilename){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
-    url = encodeURIComponent(f.name);
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
-    console.log(cmd_line);
-    var execShell = require('child_process').exec;
-    execShell(cmd_line, function (error, stdout, stderr) {
-          if (error) return cb(error);
-          var body = JSON.parse(stdout);
-          if (body.error) return cb(stdout);
-          tokens.push(body.upload.token);
-          processTop(res, req,tokens,subject,comment,data,cb);
-      });
-
-
-   /* var fileName = {
-      filename: url
+    var urlname = encodeURIComponent(f.name);
+    var options = {
+      url: remoteUrl+'/uploads.json?filename='+urlname,
+      headers: {
+        'Content-Type': 'application/binary'
+      },
+      auth: {
+        username: username,
+        password: password
+      },
     }
-    zd.attachment(filePass,fileName, function (result) {
-      console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
-      tokens.push(result.upload.token);
-      processTop(res, req,tokens,subject,comment,data,cb);
-    }); */
+    var readStream = fs.createReadStream(filePass);
+
+    readStream.pipe(
+      request.post(options, function(error, response, updata) {  
+        if (error) {
+            console.log(": Cannot upload file to due to " + error);
+        } else {
+            var body = JSON.parse(updata);
+            console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
+            tokens.push(body.upload.token);
+        }
+        processTop(res, req,tokens,subject,comment,data,cb);
+      })
+    );
   } else 
     processTop(res, req,tokens,subject,comment,data,cb);
 }
@@ -547,26 +574,31 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
   if (f.originalFilename){
     var split = f.path.split('/');
     var filePass = 'public/downloads/'+split[split.length - 1];
-    url = encodeURIComponent(f.name);
-    var cmd_line = 'curl -u drobern@benbria.com/token:ADD TOKEN HERE -H "Content-Type: application/binary"  --data-binary @'+filePass+' -X POST https://benbria.zendesk.com/api/v2/uploads.json?filename='+url;
-    console.log(cmd_line);
-    var execShell = require('child_process').exec;
-    execShell(cmd_line, function (error, stdout, stderr) {
-          if (error) return cb(error);
-          var body = JSON.parse(stdout);
-          if (body.error) return cb(stdout);
-          tokens.push(body.upload.token);
-          processComm(res, req,tokens,id,comment,data,cb);
-      });
-
-    /*var fileName = {
-      filename: url
+    var urlname = encodeURIComponent(f.name);
+    var options = {
+      url: remoteUrl+'/uploads.json?filename='+urlname,
+      headers: {
+        'Content-Type': 'application/binary'
+      },
+      auth: {
+        username: username,
+        password: password
+      },
     }
-    zd.attachment(filePass,fileName, function (result) {
-      console.log("ATTACHMENT RESULT: "+JSON.stringify(result,null,2,true));
-      tokens.push(result.upload.token);
-      processComm(res, req,tokens,id,comment,data,cb);
-    }); */
+    var readStream = fs.createReadStream(filePass);
+
+    readStream.pipe(
+      request.post(options, function(error, response, updata) {  
+        if (error) {
+            console.log(": Cannot upload file to due to " + error);
+        } else {
+            var body = JSON.parse(updata);
+            console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
+            tokens.push(body.upload.token);
+        }
+        processComm(res, req,tokens,id,comment,data,cb);
+      })
+    );
   } else 
     processComm(res, req,tokens,id,comment,data,cb);
 }

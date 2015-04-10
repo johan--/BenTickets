@@ -39,8 +39,8 @@ exports.getAudit = function(id, callback) {
         console.log("Error audit id?");
         return;
       } 
-     // console.log('BODY: '+JSON.stringify(body,null,2,true));
-     // console.log('RESULT: '+JSON.stringify(resultList,null,2,true));
+     //console.log('BODY: '+JSON.stringify(body,null,2,true));
+    // console.log('RESULT: '+JSON.stringify(resultList,null,2,true));
      callback(resultList);
     });
 }
