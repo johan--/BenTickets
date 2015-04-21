@@ -326,10 +326,12 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
 
     readStream.pipe(
       request.post(options, function(error, response, updata) {  
-        if (error) {
-            console.log(": Cannot upload file to due to " + error);
+        var body = JSON.parse(updata);
+        if (response.statusCode == '422') {
+            console.log(": Cannot upload file to due to " + JSON.stringify(body,null,2,true));
+            result = 522;
+            return ticketNew(id, res, true, result);
         } else {
-            var body = JSON.parse(updata);
             console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
             tokens.push(body.upload.token);
         }
@@ -341,7 +343,10 @@ var processNewReq = function(res,req,tokens,id,subject,comment,user,data,cb){
 }
 
 var zendeskNewCB = function(err,res, req, tokens,orgId,subject,comment,userId){
-  if (err) return console.log(err);
+  if (err) {
+    console.log(err);
+    result=err;
+  }
    var ticketJson = {
     "ticket": {
       "organization_id": orgId,
@@ -358,8 +363,10 @@ var zendeskNewCB = function(err,res, req, tokens,orgId,subject,comment,userId){
   console.log(' SUB: '+subject+' COMMENT: '+comment+' USER: '+userId);
   console.log(JSON.stringify(tokens));
   zd.createTicket(ticketJson,function(result) {
-    console.log("results: " + result);
-    ticketNew(orgId, res, true, result); });
+    console.log("THE results: " + result);
+    res.render("create",{result: result, organization: orgId, showModal:'true'});
+  //  ticketNew(orgId, res, true, result); 
+  });
 }
 
 app.post('/ticketCreate', function(req, res) {
@@ -416,18 +423,20 @@ var processReq = function(res,req,tokens,id,comment,user,data,cb){
     var readStream = fs.createReadStream(filePass);
 
     readStream.pipe(
-      request.post(options, function(error, res, updata) {  
-        if (error) {
-            console.log(": Cannot upload file to due to " + error);
+      request.post(options, function(error, response, updata) { 
+        var body = JSON.parse(updata);
+        if (response.statusCode == '422') {
+            console.log(": Cannot upload file to due to " + JSON.stringify(body,null,2,true));
+            result = 522;
+            return ticketData(id,res,req.session.organization, true, result);
         } else {
-            var body = JSON.parse(updata);
             console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
             tokens.push(body.upload.token);
         }
         processReq(res, req,tokens,id,comment,user,data,cb);
       })
     );
-  } else 
+  } else
     processReq(res, req,tokens,id,comment,user,data,cb);
 }
 
@@ -500,11 +509,15 @@ var processTop = function(res,req,tokens,subject,comment,data,cb){
     var readStream = fs.createReadStream(filePass);
 
     readStream.pipe(
-      request.post(options, function(error, response, updata) {  
-        if (error) {
-            console.log(": Cannot upload file to due to " + error);
+      request.post(options, function(error, response, updata) { 
+      var body = JSON.parse(updata); 
+        if (response.statusCode == '422') {
+            console.log(": Cannot upload file to due to " + JSON.stringify(body,null,2,true));
+            result = 522;
+            forum = zd.getForumDetails(req.session.forum);
+            var name = forum.name;
+            res.render("topicAdd",{result: result, name:name,orgId:req.session.organization,showModal:true});
         } else {
-            var body = JSON.parse(updata);
             console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
             tokens.push(body.upload.token);
         }
@@ -532,7 +545,7 @@ var topicCB = function(err,res, req, tokens, subject, comment){
   console.log(JSON.stringify(topicJson));
   zd.createTopic(topicJson,function(result) {
     console.log("results: " + result);
-    res.render("topicAdd",{result: result, name:name,showModal:true});
+    res.render("topicAdd",{result: result, name:name,orgId:req.session.organization,showModal:true});
   });
 }
 
@@ -589,10 +602,15 @@ var processComm = function(res,req,tokens,id,comment,data,cb){
 
     readStream.pipe(
       request.post(options, function(error, response, updata) {  
-        if (error) {
-            console.log(": Cannot upload file to due to " + error);
+        var body = JSON.parse(updata);
+        if (response.statusCode == '422') {
+            console.log(": Cannot upload file to due to " + JSON.stringify(body,null,2,true));
+            result = 522;
+            forum = zd.getForumDetails(req.session.forum);
+            var name = forum.name;
+           // res.render("topicAdd",{result: result, name:name,orgId:req.session.organization,showModal:true});
+           return topicData(id, req.session.forum, res, true, result);
         } else {
-            var body = JSON.parse(updata);
             console.log("TICKET UPLOAD RESPONSE " + JSON.stringify(body,null,2,true));
             tokens.push(body.upload.token);
         }

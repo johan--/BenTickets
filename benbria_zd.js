@@ -93,7 +93,7 @@ exports.updateComment = function (id, commentData, callback) {
   client.topiccomments.create(id, commentData, function (err, statusList, body, responseList, resultList) {
     if (err) {
       console.log('ERROR: '+err);
-      callback(err);
+      return callback(422);
     }
     callback(statusList);
   });
@@ -101,9 +101,10 @@ exports.updateComment = function (id, commentData, callback) {
 
 exports.createTopic = function (Data, callback) {
   client.topics.create(Data, function (err, statusList, body, responseList, resultList) {
+    //console.log('STATUS: '+statusList+' ERR: '+err);  
     if (err) {
       console.log('ERROR: '+err);
-      callback(err);
+      return callback(422);
     }
     callback(statusList);
   });
@@ -123,7 +124,7 @@ exports.createTicket = function (ticketData, callback) {
   client.tickets.create(ticketData, function (err, statusList, body, responseList, resultList) {
     if (err) {
       console.log('ERROR: '+err);
-      callback(err);
+      return callback(422);
     }
     callback(statusList);
   });

@@ -178,10 +178,10 @@ block content
                 p 
                   center 
                     h4 You must provide detail comment to update a Topic
-            if (result != 201 && result != 422)
+           if (result == 522)
               p
                 center
-                  h4 Error updating. Please contact the administrator
+                  h4 FILE UPLOAD FAILED: Problem with file selected please make sure that it's not an empty file or contact Benbria Support
           .modal-footer
               button.btn.btn-primary(data-dismiss="modal" aria-hidden="true") Close
     #retModal(data-toggle="modal" href="#ticketModal")
