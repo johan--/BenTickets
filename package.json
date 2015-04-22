@@ -16,6 +16,8 @@
     "moment":"*",
     "node-zendesk": "*",
     "nodemailer":"*",
+    "serve-favicon":"*",
+    "request":"*",
     "password-generator":"*"
    }
 }

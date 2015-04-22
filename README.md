@@ -25,7 +25,8 @@ CREATE: A config.js file in your root folder with the following
 <pre>
     var config = {};
 
-    config.username='EMAIL ADDRESS FOR ZENDESK';
+    config.username='EMAIL ADDRESS FOR ZENDESK'
+    config.password='YOUR ZENDESK PASSWORD'
     config.token='TOKEN FOR YOU ZENDESK USER'
     config.remoteUri='https://COMPANY.zendesk.com/api/v2';
 
@@ -59,4 +60,4 @@ UPDATE: 'To:' for the post to registerUser search for - <pre> to: "name@name.com
 Update email triggers for customer notification links (Email/Twitter) to point to your site
 
 
-
+Create an .ico file for your Organization and name it favicon.ico and copy it to folder public/img/
