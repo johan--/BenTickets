@@ -105,27 +105,22 @@ app.get('/register', function(req, res) {
 app.get('/organization', function(req,res){
   console.log("ORG: "+req.session.organization);
   req.session.organization=req.query.id;
-  page = req.query.page;
   if (req.query.search) {
     search = req.query.search;
   } else {
     search = null;
   }
-  console.log('WHAT PAGE AM I ON? '+page);
   for (var i in req.session.orgs) {
       if (req.session.orgs[i] == req.session.organization)
           req.session.orgname=i;
   }
   console.log ('ORGNAME: '+req.session.orgname);
 	
-  var done = function(gd, pageNum) {
+  var done = function(gd) {
    // page = zd.getPage();
-   if (!pageNum)
-      pageNum = zd.getPageNum();
-    console.log("THE PAGE NUMBER IS: "+page);
-    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, page:parseInt(page), pageNum:pageNum, search:search});    
+   res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search});    
   }
-  graphData(req.query.id, search, page, done); 
+  graphData(req.query.id, search, done); 
 });
 
 app.get('/create',function(req,res){
@@ -232,12 +227,11 @@ app.post('/userCheck', function(req, res) {
         req.session.orgname = Object.keys(record.orgs)[0];
         console.log(req.session.orgname)
         var done = function(gd) {
-          pageNum = zd.getPageNum();
           orgRec = zd.getRec();
-          console.log("THE TOTAL NUMBER OF ORG RECRODS ARE: "+orgRec+" THE TOTAL PAGE NUMBERS IS: "+pageNum);
-          res.render("organization",{gd: gd, organization:value, orgname:req.session.orgname, page:1, pageNum:pageNum});    
+          console.log("THE TOTAL NUMBER OF ORG RECRODS ARE: "+orgRec);
+          res.render("organization",{gd: gd, organization:value, orgname:req.session.orgname});    
         }
-        graphData(req.session.organization, null, 0, done);
+        graphData(req.session.organization, null, done);
       } else {
         return res.render("select",{organizations:record.orgs, username:username, res:res, showModal:'false'});
       }
@@ -254,17 +248,10 @@ app.post('/searchRequest', function(req, res){
     search = req.query.search
   }
   console.log("request for Search was called: "+req.body.search);
-  if (req.query.page) {
-    page = req.query.page
-  } else {
-    page = 0;
+  var done = function(gd) {
+    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search});    
   }
-  var done = function(gd, pageNum) {
-    if (!pageNum)
-      pageNum = zd.getPageNum();
-    res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search, page:1, pageNum:pageNum});    
-  }
-  graphData(req.session.organization, search, page, done);
+  graphData(req.session.organization, search, done);
 });
 
 app.post('/searchForum', function(req, res){
@@ -840,7 +827,7 @@ var topicData = function(id, forum, res, showModal, result, orgId) {
   }
 };
 
-var graphData = function(id, search, page, done) {
+var graphData = function(id, search, done) {
   console.log("request for handler 'TICKET CHART' was called.");
   var fields=[];
   var graphData = {};
@@ -860,7 +847,7 @@ var graphData = function(id, search, page, done) {
   if (search == null) {
    // var body = zd.getBody(id); 
     var orgName = zd.getOrganizationName(id);
-    var body = zd.getTicketBody(orgName, page);
+    var body = zd.getTicketBody(orgName);
     if (body.length == 0) {
       done(false);
     } else {
@@ -876,7 +863,7 @@ var graphData = function(id, search, page, done) {
           j++;
         }
       }
-      done(graphData, null);
+      done(graphData);
     }
   } else { 
     var string = search+' type:ticket organization:'+id;
@@ -890,30 +877,16 @@ var graphData = function(id, search, page, done) {
         done(false, 1);
       } else {
         //for (var i = body.length -1; i >= 0; i--) {
-        var count = 0;
-        if (page == 0)
-          startPage = page * 15;
-        else
-          startPage = (page - 1) * 15;
-        finishPage = startPage + 15;
         for (var i=0;i<body.length; i++) {
-          count++;
-          if (count > startPage && count <= finishPage) {
-            console.log("GOT HERE!"+body[i].id);
-            field = body[i].custom_fields[2].value;
-            var request_date = new Date(body[i].created_at); 
-            var update_date = new Date(body[i].updated_at)
-            console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+field+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
-            graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
-            j++;
-          }
+          console.log("GOT HERE!"+body[i].id);
+          field = body[i].custom_fields[2].value;
+          var request_date = new Date(body[i].created_at); 
+          var update_date = new Date(body[i].updated_at)
+          console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+field+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
+          graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+          j++;
         }
-        pageNum = Math.round(count / 15); 
-        if (count >=1 && pageNum == 0) {
-          pageNum = 1;
-        }
-        console.log("TOTAL PAGES IN GRAPHDATA: "+pageNum+" COUNT IN GRAPHDATA: "+count);
-        done(graphData, pageNum);
+        done(graphData);
       } 
     });
   }

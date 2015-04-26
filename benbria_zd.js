@@ -14,7 +14,7 @@ var client = zendesk.createClient({
    //remoteUri: 'http://localhost:8080/api/v2'
 });
 
-var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0, pageNum:0};
+var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0};
 
 client.organizations.list(function (err, statusList, body, responseList, resultList) {
   if (err) {
@@ -333,38 +333,18 @@ exports.getBody = function(organization){
   } else return [];
 }; */
 
-exports.getTicketBody = function(orgName, page){
+exports.getTicketBody = function(orgName){
+  console.log('GOT HERE');
   if (orgName && zd.tickets) {
-    console.log('ORG NAME: '+orgName);
     var result = [];
-    zd.count = 0;
-    if (page == 0)
-      startPage = page * 15;
-    else
-      startPage = (page - 1) * 15;
-    finishPage = startPage + 15;
-    console.log ("START: "+startPage+" FINISH: "+finishPage);
     for(var i=zd.tickets.length-1; i >= 0; i--) {
-      // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
+     // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
       if (zd.tickets[i].organization_name == orgName  && zd.tickets[i].status != 'Deleted') {
-        zd.count++;
-        if (zd.count > startPage && zd.count <= finishPage) {
-          console.log('COUNTER: '+zd.count+' THE TICKET ID: '+zd.tickets[i].id);
-          result.push(zd.tickets[i]);
-        }
+        result.push(zd.tickets[i]);
       }
     }
-    pageCalc = (zd.count / 15);
-    pageTest = Math.round(zd.count / 15);
-    if (pageCalc > pageTest) {
-      zd.pageNum = pageTest + 1;
-    } else {
-      zd.pageNum = pageTest;
-    }
-    zd.page = page;
-    console.log ('THE PAGE NUMBER: '+zd.pageNum);
-    return result;
-  } else return [];
+  }
+  return result;
 };
 
 exports.getAuth = function(ticket){
@@ -401,8 +381,6 @@ exports.getTicketAuthor = function(id){
   return "unknown";
 }
 
-exports.getPageNum = function(){return zd.pageNum};
-exports.getPage = function(){return zd.page}; 
 //exports.getResponse = function(){return zd.responseList};
 //exports.getResult = function(){return zd.resultList};
 //exports.getStatus = function(){return zd.statusList};

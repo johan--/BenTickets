@@ -27,7 +27,7 @@ block content
       if (gd) {
 
         var table = new google.visualization.Table(document.getElementById('chart_div'));
-        table.draw(chart, {showRowNumber: false});
+        table.draw(chart, {showRowNumber: false, width: "99%", page:'enable', pageSize: 10, sortColumn: 0, sortAscending: false});
 
         // Add event if user clicks a ticket in row
         google.visualization.events.addListener(table, 'select', function() {
@@ -70,7 +70,7 @@ block content
             ul.dropdown-menu
               if (orgId)
                 li
-                  a(href="organization?id="+orgId+"&page="+1) Select a Ticket
+                  a(href="organization?id="+orgId) Select a Ticket
                 li
                   a(href="create") Create a New Ticket
           li.dropdown
@@ -86,15 +86,18 @@ block content
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
     .jumbotron
         h1.titre #{name}! 
-    .container
-      form.form-inline(action="/searchForum",method="post",enctype="multipart/form-data" role="form")
-        div(align="right")
-          .form-group
-            label(for="inputSearch") Search
-              &nbsp
-            input.form-control(type="text" id="inputSearch" name="search" placeholder="Search String")
-          button.btn.btn-primary Search
-      div#chart_div
+    .search-forum
+      .container
+        form.form-inline(action="/searchForum",method="post",enctype="multipart/form-data" role="form")
+            div(align="right")
+              .form-group
+                label(for="inputSearch") Search
+                  &nbsp
+                input.form-control(type="text" id="inputSearch" name="search" placeholder="Search String")
+              button.btn.btn-primary Search
+        .forum-list
+          .row
+            div#chart_div
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 

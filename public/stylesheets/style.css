@@ -555,6 +555,51 @@ input.file {
     content:url('/img/icons/email.png');
 }
 
+.jumbotron {
+  background-image:url('http://static.coverphotobox.com/12/11/Facebook-Cover-kitties-cute-cats.jpg');
+  height: 500px;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.jumbotron .container {
+  position: relative;
+  top:100px;
+}
+
+.jumbotron h1 {
+  color: #fff;
+  font-size: 48px;  
+  font-family: 'Shift', sans-serif;
+  font-weight: bold;
+}
+
+.jumbotron p {
+  font-size: 20px;
+  color: #fff;
+}
+
+.google-visualization-table-div-page {
+    text-align: center; 
+    width: 100%;
+    font-size:18px;
+    font-weight:450;
+}
+
+.google-visualization-table-tr-even td {
+    white-space: nowrap;
+}
+
+.google-visualization-table-tr-odd td {
+    white-space: nowrap;
+}
+
+.google-visualization-table-tr-head th {
+    white-space: nowrap;
+}
+
+
+
 
 
 
