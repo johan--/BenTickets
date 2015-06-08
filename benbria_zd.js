@@ -338,9 +338,17 @@ exports.getTicketBody = function(orgName){
   if (orgName && zd.tickets) {
     var result = [];
     for(var i=zd.tickets.length-1; i >= 0; i--) {
-     // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
-      if (zd.tickets[i].organization_name == orgName  && zd.tickets[i].status != 'Deleted') {
-        result.push(zd.tickets[i]);
+     // console.log('THE TICKETS[I]: '+zd.tickets[i].organization_name.slice(0,3));
+      //console.log('THE ORGNAME: ',orgName[0].slice(0,3));
+      if (zd.tickets[i].organization_name.slice(0,3) == "A&W") {
+        if (zd.tickets[i].organization_name.slice(0,3) == orgName[0].slice(0,3)  && zd.tickets[i].status != 'Deleted') {
+          result.push(zd.tickets[i]);
+        }
+      } else { 
+        // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
+        if (zd.tickets[i].organization_name == orgName  && zd.tickets[i].status != 'Deleted') {
+          result.push(zd.tickets[i]);
+        }
       }
     }
   }

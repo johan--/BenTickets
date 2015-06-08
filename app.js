@@ -853,6 +853,7 @@ var graphData = function(id, search, done) {
     } else {
      // for (var i = body.length -1; i >= 0; i--) {
       for (var i=0;i<body.length; i++) {
+        //console.log('THE TICKET BODY AW: '+JSON.stringify(body[i]), null,2,true);
         if (body[i].status != 'Deleted') {
           field = body[i].field_22799616;
           var request_test = new Date(body[i].created_at); 
@@ -878,10 +879,12 @@ var graphData = function(id, search, done) {
       } else {
         //for (var i = body.length -1; i >= 0; i--) {
         for (var i=0;i<body.length; i++) {
-          console.log("GOT HERE!"+body[i].id);
+          console.log("GOT HERE! "+JSON.stringify(body[i],null,2,true));
           field = body[i].custom_fields[2].value;
-          var request_date = new Date(body[i].created_at); 
-          var update_date = new Date(body[i].updated_at)
+          var request_test = new Date(body[i].created_at); 
+          var request_date = moment(request_test).format("MMMM Do YYYY");
+          var update_test = new Date(body[i].updated_at);
+          var update_date = moment(update_test).format("MMMM Do YYYY");
           console.log('ID: '+body[i].id+' SUBJECT: '+body[i].subject+' TYPE: '+body[i].type+' ORGANIZATION: '+organization+' CATEGORY: '+field+' REQUEST DATE '+request_date+' UPDATE DATE: '+update_date+' STATUS: '+body[i].status);
           graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":organization,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
           j++;
