@@ -27,7 +27,7 @@ block content
       if (gd) {
 
         var table = new google.visualization.Table(document.getElementById('chart_div'));
-        table.draw(chart, {showRowNumber: false, width: '99%', page:'enable', pageSize: 10, sortColumn: 0, sortAscending: false});
+        table.draw(chart, {showRowNumber: false, width: '75%', page:'enable', pageSize: 10, sortColumn: 0, sortAscending: false});
 
         // Add event if user clicks a ticket in row
         google.visualization.events.addListener(table, 'select', function() {
@@ -38,6 +38,11 @@ block content
         $('#chart_div').text("NO TICKETS FOUND FOR YOUR LOCATION");
       }
     }
+
+     $(window).resize(function(){
+      drawTable();
+    });
+
   body
     nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
 
@@ -89,11 +94,11 @@ block content
           div(align="right")
             .form-group
               input.form-control(type="text" id="inputSearch" name="search" placeholder="Search Your Tickets" value=search) 
-            button.btn.btn-primary Search
-        .ticket-list
-          .row
-            div(align="center")
-              div#chart_div
+              button.btn.btn-primary Search
+      .ticket-list
+        .row
+          div(align="center")
+            div#chart_div
     #contact 
       a.button(data-toggle="modal" href="#myModal") Contact Us
 

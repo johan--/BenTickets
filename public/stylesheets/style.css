@@ -587,7 +587,7 @@ input.file {
 }
 
 .google-visualization-table-tr-even td {
-    white-space: nowrap;
+     white-space: nowrap;
 }
 
 .google-visualization-table-tr-odd td {
@@ -595,8 +595,9 @@ input.file {
 }
 
 .google-visualization-table-tr-head th {
-    white-space: nowrap;
+   white-space: nowrap;
 }
+
 
 
 

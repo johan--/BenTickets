@@ -151,7 +151,7 @@ var index = {};
 var update = function(){
   console.log("..." + n++); 
   fiveMinute = Math.round((new Date() - (5 * 60 * 1000)) / 1000);
-  console.log("START TIME: "+start_time+" FIVE MINUTE TIME: "+fiveMinute);
+  //console.log("START TIME: "+start_time+" FIVE MINUTE TIME: "+fiveMinute);
   
   if (start_time > fiveMinute)
     start_time = fiveMinute;
@@ -160,7 +160,7 @@ var update = function(){
     if (err) {
       return;
     }
-    //console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
+   // console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
     output = [];
     if (start == 0) {
       zd.tickets = body.results;
@@ -345,7 +345,7 @@ exports.getTicketBody = function(orgName){
           result.push(zd.tickets[i]);
         }
       } else { 
-        // console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
+        //console.log('THE TICKET: '+i+' '+JSON.stringify(zd.tickets[i],null,2,true));
         if (zd.tickets[i].organization_name == orgName  && zd.tickets[i].status != 'Deleted') {
           result.push(zd.tickets[i]);
         }
@@ -354,6 +354,16 @@ exports.getTicketBody = function(orgName){
   }
   return result;
 };
+exports.getTicketList = function (id, callback) {
+  client.tickets.listByOrganization(id, function (err,statusList, body, responseList, resultList) {
+    if (err) {
+      console.log("ERROR: "+JSON.stringify(err,null,2,true));
+      callback(err);
+    }
+   // console.log("THE TICKET LIST: ",JSON.stringify(body,null,2,true));
+    callback(body);  
+  });
+}
 
 exports.getAuth = function(ticket){
   if (ticket && zd.body) {
