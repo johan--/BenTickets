@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "email-templates":"*",
-    "express": "3.4.0",
+    "express": "4.19.2",
     "jade": "*",
     "stylus": "*",
     "md5": "*",
